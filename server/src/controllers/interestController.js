@@ -1,3 +1,2 @@
-import pool from 
+import pool from "../config/db";
 
-export const showInterest ()

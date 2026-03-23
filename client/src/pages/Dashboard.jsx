@@ -32,7 +32,7 @@ export default function Dashboard() {
   const fetchIdeas = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/ideas");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas`  );
       const data = await response.json();
       setIdeas(data);
     } catch (err) {
@@ -144,7 +144,7 @@ function IdeaCard({ idea, user }) {
         </div>
         <br />
         <div className="flex justify-between items-center">
-          <VotePill />
+          <VotePill ideaId={idea.id} />
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-100">

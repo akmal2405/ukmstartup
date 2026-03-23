@@ -59,7 +59,7 @@ export const signup = async (req, res) => {
          result = await pool.query(
         `INSERT INTO users (email, password, user_type, company_name, industry, contact_person, phone)  
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, email, user_type, company_name`,
+       RETURNING id, email, user_type, company_name, contact_person`,
         [email, hashedPassword, userType,  companyName || null, industry || null, contactPerson || null, phone || null]
       );
     }
