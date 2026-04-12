@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config()
 import express from "express";
+import pool from "./config/db.js";
 import cors from "cors";
 import ideaRoutes from "./routes/ideaRoutes.js"
 import authRoutes from "./routes/authRoutes.js";
@@ -28,7 +29,6 @@ app.get("/", (req, res) => {
   res.send("UKMStartUp API is running");
 });
 
-import pool from "./config/db.js";
 
 app.get("/test-db", async (req, res) => {
   const result = await pool.query("SELECT NOW()");

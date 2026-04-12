@@ -33,4 +33,3 @@ router.post(
 
 export default router;
 
-console.log("ideaRoutes loaded");
