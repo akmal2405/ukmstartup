@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clock } from "lucide-react";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
+//
 import VotePill from "../components/VotePill";
 import { useAuth } from "../context/AuthContext";
 
 
 export default function Dashboard() {
-  const [isOpen, setIsOpen] = useState(true);
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -43,12 +41,6 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
-      <Sidebar isOpen={isOpen} />
-
-      <main className="flex-1">
-        <Topbar toggleSidebar={() => setIsOpen(!isOpen)} />
-
         <section className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -79,14 +71,16 @@ export default function Dashboard() {
             </div>
           )}
         </section>
-      </main>
-    </div>
+      
   );
 }
 
 function IdeaCard({ idea, user }) {
+  const navigate = useNavigate();
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer group">
+    <div
+    onClick={() => navigate(`/idea/${idea.id}`)} 
+    className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer group">
       <div className="relative h-48 overflow-hidden bg-gray-100">
         {idea.cover_image_url ? (
           <img

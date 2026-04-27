@@ -6,6 +6,7 @@ import cors from "cors";
 import ideaRoutes from "./routes/ideaRoutes.js"
 import authRoutes from "./routes/authRoutes.js";
 import voteRoutes from "./routes/voteRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 
 
 const app = express();
@@ -22,6 +23,9 @@ app.use("/api/ideas", voteRoutes);
 app.use("/api/ideas", ideaRoutes);
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/ideas", commentRoutes);
+
 
 
 // test route

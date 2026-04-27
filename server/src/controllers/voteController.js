@@ -3,8 +3,8 @@ import {
   getUserVote,
   getVoteCounts, 
   insertVote,
-  deleteVote,      // ← add this
-  updateVote,      // ← add this
+  deleteVote,     
+  updateVote,      
   recalculateVoteCounts
 } from "../models/voteModel.js";
 

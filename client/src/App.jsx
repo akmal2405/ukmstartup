@@ -6,6 +6,8 @@ import Footer from "./components/Footer";
 import UKMStartUPRegister from "./pages/RegisterType";
 import Register from "./pages/Signup";
 import { useAuth } from "./context/AuthContext";
+import PitchDeck from "./pages/PitchDeck";
+import Layout  from "./components/Layout";
 
 function ProtectedRoute({ children }) {
   const { user, authChecked } = useAuth();
@@ -26,26 +28,23 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <BrowserRouter>
-      <div className="app-container">
         <Routes>
           <Route path="/" element={<UKMStartUPLogin />} />
           <Route path="/login" element={<UKMStartUPLogin />} />
           <Route path="/signup" element={<UKMStartUPRegister />} />
           <Route path="/signup/:type" element={<Register />} />
-          {/* ← ProtectedRoute wrapping below */}
-          <Route path="/dashboard" element={
+
+          <Route element={
             <ProtectedRoute>
-              <Dashboard />
+              <Layout />
             </ProtectedRoute>
-          } />
-          <Route path="/create-idea" element={
-            <ProtectedRoute>
-              <CreateIdea />
-            </ProtectedRoute>
-          } />
+          }>
+          <Route path="/dashboard" element={<Dashboard />} /> 
+          <Route path="/create-idea" element={<CreateIdea />} />
+          <Route path="/idea/:id" element={<PitchDeck />} />
+        </Route>
         </Routes>
         <Footer />
-      </div>
     </BrowserRouter>
   );
 }

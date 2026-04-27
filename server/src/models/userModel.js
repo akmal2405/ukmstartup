@@ -9,7 +9,7 @@ export const findUserByEmail = async (email) => {
     
   }
 }
-
+  
 export const insertCommunityUser = async (
   email, hashedPassword, userType, fullName, communityRole, faculty, matricNumber, yearOfStudy
 ) => {

@@ -23,6 +23,29 @@ export const getAllIdeas = async () => {
   }
 };
 
+
+export const getIdeaById = async (id) => {
+  try {
+      const result = await pool.query(`SELECT 
+      ideas.id, 
+      ideas.startup_name, 
+      ideas.category,
+      ideas.phone_number, 
+      ideas.logo_url, 
+      ideas.cover_image_url,
+      ideas.short_description, 
+      ideas.status, 
+      users.full_name AS owner_name 
+      FROM ideas 
+      JOIN users ON ideas.user_id  = users.id
+      WHERE ideas.id = $1`, [id]
+    );
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  } 
+  };
+
 export const insertIdeas = async (
   userId,
   startupName,
