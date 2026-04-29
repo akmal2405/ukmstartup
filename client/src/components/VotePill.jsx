@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { ArrowBigUp, ArrowBigDown, MessageCircle } from "lucide-react";
 
-export default function VotePill({ ideaId }) {
+
+export default function VotePill({ ideaId, commentCount = 0  }) {
   const [netScore, setNetScore] = useState(0);
   const [userVote, setUserVote] = useState(null); // "up", "down", or null
 
@@ -65,8 +66,9 @@ export default function VotePill({ ideaId }) {
         <ArrowBigDown className={`w-4 h-4 ${userVote === "down" ? "text-blue-500" : "text-gray-600"}`} />
       </div>
 
-      <div className="p-1 rounded-full hover:bg-gray-300 cursor-pointer">
+      <div className="flex items-center gap-1 p-1 rounded-full hover:bg-gray-300 cursor-pointer">
         <MessageCircle className="w-4 h-4 text-gray-600" />
+        <span className="text-xs text-gray-600">{commentCount}</span>
       </div>
     </div>
   );

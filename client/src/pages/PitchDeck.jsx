@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom"
 import { useAuth } from "../context/AuthContext";
 import CommentSection from "../components/CommentSection";
+import VotePill from "../components/VotePill";
+import { comment } from "postcss";
+
 
 
 export default function PitchDeck() {
@@ -100,11 +103,9 @@ export default function PitchDeck() {
             <h3 className="font-bold text-gray-900 mb-3">Idea Stats</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Upvotes</span>
-                <span className="font-semibold">{idea.upvote_count}</span>
+                <VotePill ideaId={idea.id} commentCount={idea.comment_count}></VotePill>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Downvotes</span>
                 <span className="font-semibold">{idea.downvote_count}</span>
               </div>
             </div>

@@ -35,16 +35,21 @@ export const getIdeaById = async (id) => {
       ideas.cover_image_url,
       ideas.short_description, 
       ideas.status, 
-      users.full_name AS owner_name 
+      users.full_name AS owner_name,  
+      COUNT (comments.id) AS comment_count
       FROM ideas 
       JOIN users ON ideas.user_id  = users.id
-      WHERE ideas.id = $1`, [id]
+      LEFT JOIN comments ON comments.idea_id = ideas.id  -- ← add this
+      WHERE ideas.id = $1
+      GROUP BY ideas.id, users.full_name`, [id]
+      
     );
     return result.rows[0];
   } catch (error) {
     throw error;
   } 
   };
+
 
 export const insertIdeas = async (
   userId,
