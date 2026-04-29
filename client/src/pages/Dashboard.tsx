@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clock } from "lucide-react";
-//
 import VotePill from "../components/VotePill";
 import { useAuth } from "../context/AuthContext";
-
+import { Idea, User } from "../types";
 
 export default function Dashboard() {
-  const [ideas, setIdeas] = useState([]);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const {user} = useAuth();
+  const { user } = useAuth();
 
-  // Handles browser back button loading from cache
   useEffect(() => {
-    const handlePageShow = (e) => {
+    const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         window.location.reload();
       }
@@ -30,8 +28,8 @@ export default function Dashboard() {
   const fetchIdeas = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas`  );
-      const data = await response.json();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas`);
+      const data: Idea[] = await response.json();
       setIdeas(data);
     } catch (err) {
       console.error("Error fetching ideas:", err);
@@ -41,46 +39,49 @@ export default function Dashboard() {
   };
 
   return (
-        <section className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                Selamat Datang ke UKMStartUp
-              </h3>
-              <p className="text-gray-600 mt-1">
-                Terokai idea startup terkini dari komuniti UKM
-              </p>
-            </div>
-          </div>
+    <section className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            Selamat Datang ke UKMStartUp
+          </h3>
+          <p className="text-gray-600 mt-1">
+            Terokai idea startup terkini dari komuniti UKM
+          </p>
+        </div>
+      </div>
 
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : ideas.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-md p-12 text-center">
-              <p className="text-xl text-gray-500 mb-4">
-                Belum ada idea startup.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ideas.map((idea) => (
-                <IdeaCard key={idea.id} idea={idea} user={user}/>
-              ))}
-            </div>
-          )}
-        </section>
-      
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : ideas.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-md p-12 text-center">
+          <p className="text-xl text-gray-500 mb-4">Belum ada idea startup.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {ideas.map((idea) => (
+            <IdeaCard key={idea.id} idea={idea} user={user} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
-function IdeaCard({ idea, user }) {
+interface IdeaCardProps {
+  idea: Idea;
+  user: User | null;
+}
+
+function IdeaCard({ idea, user }: IdeaCardProps) {
   const navigate = useNavigate();
   return (
     <div
-    onClick={() => navigate(`/idea/${idea.id}`)} 
-    className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer group">
+      onClick={() => navigate(`/idea/${idea.id}`)}
+      className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer group"
+    >
       <div className="relative h-48 overflow-hidden bg-gray-100">
         {idea.cover_image_url ? (
           <img
@@ -132,7 +133,7 @@ function IdeaCard({ idea, user }) {
         <div className="flex gap-2">
           {user?.userType === "company" && (
             <button className="flex-1 bg-indigo-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
-              Tunjukkan Minat 
+              Tunjukkan Minat
             </button>
           )}
         </div>

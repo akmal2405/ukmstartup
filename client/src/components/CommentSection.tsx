@@ -1,21 +1,23 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Comment } from "../types";
 
-// Add this comment section component at the bottom of PitchDeck.jsx
-export default function CommentSection({ ideaId }) {
+interface CommentSectionProps {
+  ideaId: string | number;
+}
+
+export default function CommentSection({ ideaId }: CommentSectionProps) {
   const { user } = useAuth();
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // fetch comments
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${ideaId}/comments`);
-        const data = await res.json();
+        const data: Comment[] = await res.json();
         setComments(data);
       } catch (err) {
         console.error("Error fetching comments:", err);
@@ -26,7 +28,6 @@ export default function CommentSection({ ideaId }) {
     fetchComments();
   }, [ideaId]);
 
-  // post comment
   const handleSubmit = async () => {
     if (!content.trim()) return;
     setSubmitting(true);
@@ -40,9 +41,9 @@ export default function CommentSection({ ideaId }) {
         },
         body: JSON.stringify({ content }),
       });
-      const newComment = await res.json();
-      setComments([newComment, ...comments]); // add to top
-      setContent(""); // clear input
+      const newComment: Comment = await res.json();
+      setComments([newComment, ...comments]);
+      setContent("");
     } catch (err) {
       console.error("Error posting comment:", err);
     } finally {
@@ -54,7 +55,6 @@ export default function CommentSection({ ideaId }) {
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
       <h3 className="font-bold text-gray-900 mb-4">Comments</h3>
 
-      {/* Comment input */}
       {user && (
         <div className="mb-4">
           <textarea
@@ -74,7 +74,6 @@ export default function CommentSection({ ideaId }) {
         </div>
       )}
 
-      {/* Comments list */}
       {loading ? (
         <p className="text-sm text-gray-500">Loading comments...</p>
       ) : comments.length === 0 ? (

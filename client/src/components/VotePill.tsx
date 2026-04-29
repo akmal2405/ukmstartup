@@ -1,55 +1,56 @@
 import { useState, useEffect } from "react";
 import { ArrowBigUp, ArrowBigDown, MessageCircle } from "lucide-react";
+import { VoteType, VoteResponse } from "../types";
 
+interface VotePillProps {
+  ideaId: number;
+  commentCount?: number;
+}
 
-export default function VotePill({ ideaId, commentCount = 0  }) {
+export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
   const [netScore, setNetScore] = useState(0);
-  const [userVote, setUserVote] = useState(null); // "up", "down", or null
+  const [userVote, setUserVote] = useState<VoteType | null>(null);
 
   useEffect(() => {
-     const fetchVotes = async () => {
+    const fetchVotes = async () => {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${ideaId}/vote`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data: VoteResponse = await res.json();
+      console.log("vote response:", data);
+      setNetScore(data.net_score);
+      setUserVote(data.user_vote);
+    };
+
+    if (ideaId) fetchVotes();
+  }, [ideaId]);
+
+  const handleVote = async (voteType: VoteType) => {
+    console.log("handleVote called with:", voteType);
     const token = localStorage.getItem("token");
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${ideaId}/vote`, {
-      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ voteType }),
     });
 
-    const data = await res.json();
-    console.log("vote response:", data); // 
+    console.log("res status:", res.status);
+    const data: VoteResponse = await res.json();
+    console.log("vote response:", data);
     setNetScore(data.net_score);
-    setUserVote(data.user_vote);
-  };
 
-  if (ideaId) fetchVotes()
-    // fetch current votes when component loads
-  }, [ideaId]);
-
-  const handleVote = async (voteType) => {
-    // call POST /api/ideas/:id/vote
-    console.log("handleVote called with:", voteType); 
-    const token = localStorage.getItem("token");
-
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${ideaId}/vote`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ voteType }),
-  });
-
-  console.log("res status:", res.status);
-  const data = await res.json();
-  console.log("vote response:", data); 
-  setNetScore(data.net_score);
-
-
-  // Update userVote state
-  if (userVote === voteType) {
-    setUserVote(null); // toggle off
-  } else {
-    setUserVote(voteType); // new vote or switched
-  }
+    if (userVote === voteType) {
+      setUserVote(null);
+    } else {
+      setUserVote(voteType);
+    }
   };
 
   return (

@@ -1,10 +1,22 @@
 import { useState } from "react";
 
-const CreateIdeaForm = () => {
-  const [logoFile, setLogoFile] = useState(null);
-  const [coverFile, setCoverFile] = useState(null);
+interface CreateIdeaFormProps {
+  onSuccess?: () => void;
+}
 
-  const [formData, setFormData] = useState({
+interface FormData {
+  startupName: string;
+  category: string;
+  phoneNumber: string;
+  shortDescription: string;
+  status: string;
+}
+
+const CreateIdeaForm = ({ onSuccess }: CreateIdeaFormProps) => {
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+
+  const [formData, setFormData] = useState<FormData>({
     startupName: "",
     category: "",
     phoneNumber: "",
@@ -12,17 +24,18 @@ const CreateIdeaForm = () => {
     status: "draft",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // ✅ USE FormData
     const data = new FormData();
     data.append("startupName", formData.startupName);
     data.append("category", formData.category);
@@ -38,10 +51,10 @@ const CreateIdeaForm = () => {
     try {
       const response = await fetch("http://localhost:5000/api/ideas", {
         method: "POST",
-        headers:{
+        headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: data, 
+        body: data,
       });
 
       if (!response.ok) throw new Error("Failed to submit idea");
@@ -60,6 +73,7 @@ const CreateIdeaForm = () => {
       });
       setLogoFile(null);
       setCoverFile(null);
+      onSuccess?.();
     } catch (error) {
       console.error(error);
       alert("Error submitting idea");
@@ -71,7 +85,6 @@ const CreateIdeaForm = () => {
       onSubmit={handleSubmit}
       className="bg-white p-6 rounded-lg shadow space-y-4"
     >
-      {/* Company Name */}
       <input
         type="text"
         name="startupName"
@@ -82,7 +95,6 @@ const CreateIdeaForm = () => {
         required
       />
 
-      {/* Category */}
       <select
         name="category"
         value={formData.category}
@@ -97,7 +109,6 @@ const CreateIdeaForm = () => {
         <option value="Social">Social</option>
       </select>
 
-      {/* Phone */}
       <input
         type="text"
         name="phoneNumber"
@@ -107,30 +118,22 @@ const CreateIdeaForm = () => {
         placeholder="Phone Number"
       />
 
-      {/* Logo */}
-      <label className="block text-sm font-medium text-gray-700">
-        Logo Image
-      </label>
-      <input
-        label="SKSNKJSNK"
-        type="file"
-        accept="image/*"
-        onChange={(e) => setLogoFile(e.target.files[0])}
-        className="w-full border rounded px-3 py-2"
-      />
-
-      {/* Cover */}
-      <label className="block text-sm font-medium text-gray-700">
-        Cover Image
-      </label>
+      <label className="block text-sm font-medium text-gray-700">Logo Image</label>
       <input
         type="file"
         accept="image/*"
-        onChange={(e) => setCoverFile(e.target.files[0])}
+        onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
         className="w-full border rounded px-3 py-2"
       />
 
-      {/* Description */}
+      <label className="block text-sm font-medium text-gray-700">Cover Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+        className="w-full border rounded px-3 py-2"
+      />
+
       <textarea
         name="shortDescription"
         value={formData.shortDescription}

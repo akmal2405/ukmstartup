@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // ← add Navigate
+import { ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import UKMStartUPLogin from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CreateIdea from "./pages/CreateIdea";
@@ -7,9 +8,9 @@ import UKMStartUPRegister from "./pages/RegisterType";
 import Register from "./pages/Signup";
 import { useAuth } from "./context/AuthContext";
 import PitchDeck from "./pages/PitchDeck";
-import Layout  from "./components/Layout";
+import Layout from "./components/Layout";
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, authChecked } = useAuth();
 
   if (!authChecked) {
@@ -28,23 +29,25 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<UKMStartUPLogin />} />
-          <Route path="/login" element={<UKMStartUPLogin />} />
-          <Route path="/signup" element={<UKMStartUPRegister />} />
-          <Route path="/signup/:type" element={<Register />} />
+      <Routes>
+        <Route path="/" element={<UKMStartUPLogin />} />
+        <Route path="/login" element={<UKMStartUPLogin />} />
+        <Route path="/signup" element={<UKMStartUPRegister />} />
+        <Route path="/signup/:type" element={<Register />} />
 
-          <Route element={
+        <Route
+          element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
-          }>
-          <Route path="/dashboard" element={<Dashboard />} /> 
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/create-idea" element={<CreateIdea />} />
           <Route path="/idea/:id" element={<PitchDeck />} />
         </Route>
-        </Routes>
-        <Footer />
+      </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

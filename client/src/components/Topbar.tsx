@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, Bell } from "lucide-react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -9,13 +9,16 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
 
+interface TopbarProps {
+  toggleSidebar: () => void;
+}
 
-export default function Topbar({ toggleSidebar }) {
+export default function Topbar({ toggleSidebar }: TopbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
   const displayName = user?.fullName;
+
   const handleSearch = () => {
     if (searchQuery.trim()) {
       console.log("Searching for:", searchQuery);
@@ -24,19 +27,17 @@ export default function Topbar({ toggleSidebar }) {
 
   return (
     <header className="h-16 bg-white border border-gray-200  flex items-center justify-between px-6 shadow-sm">
-      {/* LEFT: Sidebar toggle + title */}
       <div className="flex items-center gap-4">
         <button
           onClick={toggleSidebar}
           className="p-2 rounded-lg hover:bg-gray-100 transition"
         >
-          <Bars3Icon className="w-6 h-6 text-gray-600" /> 
+          <Bars3Icon className="w-6 h-6 text-gray-600" />
         </button>
 
         <h2 className="text-lg font-semibold text-gray-700"></h2>
       </div>
 
-      {/* CENTER: Search */}
       <div className="flex-1 max-w-xl mx-8">
         <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-4 py-2 shadow-md hover:shadow-lg transition">
           <Search size={18} className="text-gray-400" />
@@ -59,7 +60,6 @@ export default function Topbar({ toggleSidebar }) {
         </div>
       </div>
 
-      {/* RIGHT: Notification + profile */}
       <div className="flex items-center gap-4">
         <button className="relative p-2 hover:bg-gray-100 rounded-lg">
           <Bell size={20} className="text-gray-600" />
