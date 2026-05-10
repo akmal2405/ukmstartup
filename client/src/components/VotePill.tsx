@@ -54,6 +54,8 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
   };
 
   return (
+  <div className="flex items-center gap-2">
+    {/* Vote pill */}
     <div className="flex items-center gap-1 bg-gray-200 rounded-full px-2 py-1">
       <div onClick={() => handleVote("up")} className="p-1 rounded-full hover:bg-gray-300 cursor-pointer">
         <ArrowBigUp className={`w-4 h-4 ${userVote === "up" ? "text-orange-500" : "text-gray-600"}`} />
@@ -66,11 +68,15 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
       <div onClick={() => handleVote("down")} className="p-1 rounded-full hover:bg-gray-300 cursor-pointer">
         <ArrowBigDown className={`w-4 h-4 ${userVote === "down" ? "text-blue-500" : "text-gray-600"}`} />
       </div>
-
-      <div className="flex items-center gap-1 p-1 rounded-full hover:bg-gray-300 cursor-pointer">
-        <MessageCircle className="w-4 h-4 text-gray-600" />
-        <span className="text-xs text-gray-600">{commentCount}</span>
-      </div>
     </div>
-  );
+
+    {/* Comment count — outside pill */}
+    <div className="flex items-center gap-1 cursor-pointer">
+      <MessageCircle className="w-4 h-4 text-gray-600" />
+      <span className="text-xs text-gray-600">{commentCount}</span>
+    </div>
+  </div>
+);
+
+
 }

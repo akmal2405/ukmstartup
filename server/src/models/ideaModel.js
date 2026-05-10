@@ -12,9 +12,12 @@ export const getAllIdeas = async () => {
         ideas.phone_number,
         ideas.short_description,
         ideas.created_at,
-        users.full_name AS owner_name
+        users.full_name AS owner_name,  
+        COUNT(comments.id)::int AS comment_count
       FROM ideas
       JOIN users ON ideas.user_id = users.id
+      LEFT JOIN comments ON comments.idea_id = ideas.id
+      GROUP BY ideas.id, users.full_name
       ORDER BY ideas.created_at DESC`
     );
     return result.rows;
@@ -39,7 +42,7 @@ export const getIdeaById = async (id) => {
       COUNT (comments.id) AS comment_count
       FROM ideas 
       JOIN users ON ideas.user_id  = users.id
-      LEFT JOIN comments ON comments.idea_id = ideas.id  -- ← add this
+      LEFT JOIN comments ON comments.idea_id = ideas.id 
       WHERE ideas.id = $1
       GROUP BY ideas.id, users.full_name`, [id]
       

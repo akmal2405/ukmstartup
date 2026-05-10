@@ -21,6 +21,7 @@ export interface Idea {
   logo_url?: string;
   owner_name: string;
   created_at: string;
+  status: "pending" | "approved" | "rejected";
   comment_count: number;
   downvote_count: number;
   upvote_count: number;

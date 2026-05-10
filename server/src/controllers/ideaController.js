@@ -3,6 +3,7 @@
   export const getIdeas = async (req, res) => {
     try {
       const ideas = await getAllIdeas();
+      console.log("first idea:", ideas[0]); 
       res.json(ideas);
     } catch (error) {
       console.error("GET IDEAS ERROR:", error);

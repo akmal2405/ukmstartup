@@ -1,116 +1,96 @@
 import { useState } from "react";
-import { Search, Bell } from "lucide-react";
-import { Bars3Icon } from "@heroicons/react/24/outline";
+import { Search, Bell, Plus } from "lucide-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import {
-  UserCircleIcon,
-  Cog6ToothIcon,
-  ArrowLeftStartOnRectangleIcon,
-} from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
+import { UserCircleIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
 
-interface TopbarProps {
-  toggleSidebar: () => void;
-}
-
-export default function Topbar({ toggleSidebar }: TopbarProps) {
+export default function Topbar() {
   const [searchQuery, setSearchQuery] = useState("");
-
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const displayName = user?.fullName;
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-    }
-  };
+  const initials = user?.fullName
+    ?.split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "U";
 
   return (
-    <header className="h-16 bg-white border border-gray-200  flex items-center justify-between px-6 shadow-sm">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-lg hover:bg-gray-100 transition"
-        >
-          <Bars3Icon className="w-6 h-6 text-gray-600" />
-        </button>
+    <header className="sticky top-0 z-40 h-16 bg-white/95 backdrop-blur border-b border-slate-200 flex items-center px-4 sm:px-6 gap-4">
+      
+      {/* Logo */}
+      <a href="/dashboard" className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 shrink-0">
+        UKMStartUp
+      </a>
 
-        <h2 className="text-lg font-semibold text-gray-700"></h2>
-      </div>
-
-      <div className="flex-1 max-w-xl mx-8">
-        <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-4 py-2 shadow-md hover:shadow-lg transition">
-          <Search size={18} className="text-gray-400" />
+      {/* Search */}
+      <div className="flex-1 max-w-xl mx-auto hidden sm:block">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Search for ideas, users..."
-            className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+            placeholder="Cari idea, syarikat, atau pengasas…"
+            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-slate-100 text-sm text-slate-700 placeholder:text-slate-400 border border-transparent focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition"
           />
-          {searchQuery && (
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 transition"
-            >
-              Search
-            </button>
-          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-          <Bell size={20} className="text-gray-600" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+      {/* Right side */}
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+        
+        {/* Bell */}
+        <button className="relative p-2 rounded-full hover:bg-slate-100 text-slate-600 transition">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
         </button>
 
-        <span className="text-sm text-gray-600">{displayName}</span>
+        {/* Hantar Idea */}
+        <button
+          onClick={() => navigate("/create-idea")}
+          className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition"
+        >
+          <Plus className="w-4 h-4" />
+          Hantar Idea
+        </button>
 
+        {/* Avatar dropdown */}
         <Menu as="div" className="relative">
-          <MenuButton className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition">
-            {displayName?.charAt(0)?.toUpperCase() || "U"}
+          <MenuButton className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 transition">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white grid place-items-center text-xs font-bold">
+              {initials}
+            </div>
+            <span className="text-sm text-slate-700 font-medium hidden sm:block">
+              {user?.fullName?.split(" ")[0]}
+            </span>
           </MenuButton>
 
-          <MenuItems
-            transition
-            anchor="bottom end"
-            className="absolute right-0 mt-2 w-44 origin-top-right rounded-xl border bg-white p-1 text-sm text-gray-700 shadow-lg transition duration-100 ease-out data-closed:scale-95 data-closed:opacity-0"
-          >
+          <MenuItems className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-1 text-sm text-slate-700 shadow-lg z-50 focus:outline-none">
             <MenuItem>
-              <a
-                href="/profile"
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 data-focus:bg-gray-100"
-              >
-                <UserCircleIcon className="w-5 h-5 text-gray-400" />
-                Profile
+              <a href="/profile" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
+                <UserCircleIcon className="w-5 h-5 text-slate-400" />
+                Profil
               </a>
             </MenuItem>
-
             <MenuItem>
-              <a
-                href="/settings"
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 data-focus:bg-gray-100"
-              >
-                <Cog6ToothIcon className="w-5 h-5 text-purple-400" />
-                Settings
+              <a href="/settings" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
+                <Cog6ToothIcon className="w-5 h-5 text-slate-400" />
+                Tetapan
               </a>
             </MenuItem>
-
-            <div className="my-1 h-px bg-gray-200"></div>
-
+            <div className="my-1 h-px bg-slate-200" />
             <MenuItem>
-              <button
-                onClick={logout}
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-red-500 data-focus:bg-red-50"
-              >
+              <button onClick={logout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-rose-500 hover:bg-rose-50 transition">
                 <ArrowLeftStartOnRectangleIcon className="w-5 h-5" />
-                Logout
+                Log Keluar
               </button>
             </MenuItem>
           </MenuItems>
         </Menu>
+
       </div>
     </header>
   );

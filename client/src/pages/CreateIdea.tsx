@@ -1,23 +1,29 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CreateIdeaForm from "../components/CreateIdeaForm";
 
 export default function CreateIdea() {
-  const [showForm, setShowForm] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <section className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">CIPTA IDEA BARU</h1>
+    <section className="min-h-screen bg-slate-50 py-10">
+      <div className="max-w-2xl mx-auto px-6">
+        
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="text-sm text-slate-500 hover:text-slate-700 mb-4 flex items-center gap-1 transition"
+          >
+            ← Kembali ke Dashboard
+          </button>
+          <h1 className="text-3xl font-extrabold text-slate-900">Cipta Idea Baru</h1>
+          <p className="text-slate-500 mt-1">Kongsi idea startup anda dengan komuniti UKM.</p>
+        </div>
 
-      {!showForm && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          + CIPTA IDEA
-        </button>
-      )}
+        {/* Form */}
+        <CreateIdeaForm onSuccess={() => navigate("/dashboard")} />
 
-      {showForm && <CreateIdeaForm onSuccess={() => setShowForm(false)} />}
+      </div>
     </section>
   );
 }
