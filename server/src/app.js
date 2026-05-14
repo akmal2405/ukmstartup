@@ -7,6 +7,7 @@ import ideaRoutes from "./routes/ideaRoutes.js"
 import authRoutes from "./routes/authRoutes.js";
 import voteRoutes from "./routes/voteRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
+import interestRoutes from "./routes/interestRoutes.js";
 
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 
 app.use("/api/ideas", commentRoutes);
 
+app.use("/api/ideas", interestRoutes);
 
 
 // test route

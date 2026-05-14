@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { Comment } from "../types";
+import { useAuth } from "../../context/AuthContext";
+import { Comment } from "../../types";
 
 interface CommentSectionProps {
   ideaId: string | number;

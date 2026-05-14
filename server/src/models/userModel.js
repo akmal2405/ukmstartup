@@ -46,7 +46,7 @@ export const insertCompanyUser = async (
 
 export const findUserById = async (id) => {
   try {
-    const result = await pool.query("SELECT id, email, user_type, full_name, contact_person FROM users WHERE id = $1",
+    const result = await pool.query("SELECT id, email, user_type, full_name, community_role, contact_person FROM users WHERE id = $1",
        [id]);
     return result.rows[0];
   } catch (error) {

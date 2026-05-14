@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Clock, ArrowRight } from "lucide-react";
 import VotePill from "../VotePill";
 import { Idea } from "../../types";
+import { Button } from "../ui/button";
 
 
 const CATEGORY_STYLES: Record<string, string> = {
@@ -12,11 +13,6 @@ const CATEGORY_STYLES: Record<string, string> = {
   Kewangan: "bg-rose-50 text-rose-700 ring-rose-200",
 };
 
-const STATUS_STYLES: Record<string, string> = {
-  pending:  "bg-amber-50 text-amber-700 ring-amber-200",
-  approved: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  rejected: "bg-gray-100 text-gray-600 ring-gray-200",
-};
 
 function initials(name?: string) {
   if (!name) return "?";
@@ -25,7 +21,6 @@ function initials(name?: string) {
 
 export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
   const navigate = useNavigate();
-  const status = idea.status ?? "OPEN";
   const catClass = CATEGORY_STYLES[idea.category] ?? "bg-slate-100 text-slate-700 ring-slate-200";
 
   return (
@@ -35,7 +30,7 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
     >
       {/* Gradient border on hover */}
       <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[length:200%_200%] animate-gradient-pan"
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-500 transition-opacity duration-300 bg-[length:200%_200%] animate-gradient-pan"
         style={{ backgroundImage: "var(--gradient-hero)" }}
       />
       <div className="relative bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-glow)] transition-shadow duration-300">
@@ -57,14 +52,9 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
               </span>
             </div>
           )}
-          <div className="absolute top-3 left-3">
-            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 backdrop-blur bg-white/90 ${catClass}`}>
-              {idea.category}
-            </span>
-          </div>
           <div className="absolute top-3 right-3">
-            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 ${STATUS_STYLES[status]}`}>
-              ● {status}
+            <span className={`text-[11px] font-mono px-2.5 py-1 rounded-full ring-1 backdrop-blur bg-white/90 ${catClass}`}>
+              {idea.category}
             </span>
           </div>
         </div>
@@ -87,7 +77,7 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="font-extrabold text-lg text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+              <h3 className="font-extrabold text-lg text-red-900 truncate group-hover:text-indigo-600 transition-colors">
                 {idea.company_name}
               </h3>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -101,11 +91,9 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
             </div>
           </div>
 
-          {/* Category pill */}
           <div className="mb-3">
-            <span className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded-md ring-1 ${catClass}`}>
-              #{idea.category}
-            </span>
+            <span className={`inline-block text-[11px] font-semibold  ${catClass}`}>
+              {idea.startup_name?.replace(/\s+/g, "").toUpperCase() ?? "startup_name"}</span>
           </div>
 
           <p className="text-sm text-slate-600 mb-4 line-clamp-2 min-h-[40px] font-light leading-relaxed">
@@ -113,14 +101,16 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
           </p>
 
           {user?.userType === "company" && (
-            <button
+            <Button
+              variant="default"
+              size="lg"
               onClick={(e) => e.stopPropagation()}
-              className="w-full inline-flex items-center justify-center gap-2 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md hover:shadow-[var(--shadow-glow)] transition-all bg-[length:200%_200%] hover:bg-right"
+              className="inline-flex items-center justify-center bg-white text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-right"
               style={{ backgroundImage: "var(--gradient-brand)" }}
             >
               Tunjukkan Minat
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </button>
+            </Button>
           )}
 
           {/* Footer: votes + timestamp */}

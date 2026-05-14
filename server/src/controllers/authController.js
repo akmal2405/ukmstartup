@@ -20,7 +20,6 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Please provide email, password, and user type" });
     }
 
-    // ✅ model instead of pool.query
     const userExists = await findUserByEmail(email);
     if (userExists.length > 0) {
       return res.status(400).json({ message: "User already exists" });
@@ -32,7 +31,6 @@ export const signup = async (req, res) => {
     let user;
 
     if (userType === "community") {
-      // ✅ model instead of pool.query
       user = await insertCommunityUser(
         email, hashedPassword, userType,
         fullName, communityRole, faculty,
@@ -41,7 +39,6 @@ export const signup = async (req, res) => {
     }
 
     if (userType === "company") {
-      // ✅ model instead of pool.query
       user = await insertCompanyUser(
         email, hashedPassword, userType,
         companyName, industry, contactPerson, phone
@@ -59,6 +56,7 @@ export const signup = async (req, res) => {
         userType: user.user_type,
         fullName: user.full_name || user.contact_person,
         companyName: user.company_name,
+        communityRole: user.community_role,
       },
     });
   } catch (error) {
@@ -98,6 +96,7 @@ export const login = async (req, res) => {
         email: user.email,
         userType: user.user_type,
         fullName: user.full_name || user.contact_person,
+        communityRole: user.community_role,
         companyName: user.company_name,
       },
     });
@@ -122,6 +121,7 @@ export const getMe = async (req, res) => {
         email: user.email,
         userType: user.user_type,
         fullName: user.full_name || user.contact_person,
+        communityRole: user.community_role,
       },
     });
   } catch (error) {

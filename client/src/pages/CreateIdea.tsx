@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import CreateIdeaForm from "../components/CreateIdeaForm";
+import CreateIdeaForm from "../components/ideas/CreateIdeaForm";
 
 export default function CreateIdea() {
   const navigate = useNavigate();
 
   return (
-    <section className="min-h-screen bg-slate-50 py-10">
+    <section className="min-h-screen bg-white py-10">
       <div className="max-w-2xl mx-auto px-6">
         
         {/* Header */}

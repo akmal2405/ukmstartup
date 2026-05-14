@@ -3,12 +3,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import UKMStartUPLogin from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CreateIdea from "./pages/CreateIdea";
-import Footer from "./components/Footer";
+import Footer from "./components/layout/Footer";
 import UKMStartUPRegister from "./pages/RegisterType";
 import Register from "./pages/Signup";
 import { useAuth } from "./context/AuthContext";
 import PitchDeck from "./pages/PitchDeck";
-import Layout from "./components/Layout";
+import Layout from "./components/layout/Layout";
+import Profile from "./pages/Profile";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, authChecked } = useAuth();
@@ -45,6 +46,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/create-idea" element={<CreateIdea />} />
           <Route path="/idea/:id" element={<PitchDeck />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
       <Footer />

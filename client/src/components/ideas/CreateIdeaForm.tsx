@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 interface CreateIdeaFormProps {
   onSuccess?: () => void;
@@ -143,13 +144,14 @@ const CreateIdeaForm = ({ onSuccess }: CreateIdeaFormProps) => {
         placeholder="Describe your startup idea briefly..."
         required
       />
-
-      <button
+  
+      <Button
+        variant="default"
         type="submit"
-        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        className="bg-indigo-600 text-white px-6 py-2 rounded-xl hover:bg-indigo-500 transition"
       >
         Submit Idea
-      </button>
+      </Button>
     </form>
   );
 };
