@@ -1,11 +1,12 @@
 import express from "express";
 import {protect} from "../middleware/auth.js";
-import { showInterest, removeInterest, fetchInterests } from "../controllers/interestController.js";
+import { showInterest, removeInterest, fetchInterests, fetchMyInterests } from "../controllers/interestController.js";
 
 const router = express.Router();
 
-router.post("/:id/interest", protect, showInterest);
-router.delete("/:id/interest", protect, removeInterest);
-router.get("/:id/interests", protect, fetchInterests);
+router.get("/my-interests", protect, fetchMyInterests);
+router.post("/:id", protect, showInterest);
+router.delete("/:id", protect, removeInterest);
+router.get("/:id", protect, fetchInterests)
 
 export default router;

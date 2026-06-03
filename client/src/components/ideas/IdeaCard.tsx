@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Clock, ArrowRight } from "lucide-react";
-import VotePill from "../VotePill";
+import VotePill from "./VotePill";
 import { Idea } from "../../types";
 import { Button } from "../ui/button";
+import { useState } from "react";
+import InterestModal from "./interestModal";
 
 
 const CATEGORY_STYLES: Record<string, string> = {
@@ -20,6 +22,7 @@ function initials(name?: string) {
 }
 
 export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
+  const [isOpen, setIsOpen] = useState(false);  
   const navigate = useNavigate();
   const catClass = CATEGORY_STYLES[idea.category] ?? "bg-slate-100 text-slate-700 ring-slate-200";
 
@@ -39,7 +42,7 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
           {idea.cover_image_url ? (
             <img
               src={`http://localhost:5000${idea.cover_image_url}`}
-              alt={idea.company_name}
+              alt={idea.startup_name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
@@ -48,7 +51,7 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
               style={{ backgroundImage: "var(--gradient-hero)" }}
             >
               <span className="text-white text-6xl font-black opacity-25">
-                {idea.company_name?.charAt(0) || "?"}
+                {idea.startup_name?.charAt(0) || "?"}
               </span>
             </div>
           )}
@@ -65,7 +68,7 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
             {idea.logo_url ? (
               <img
                 src={`http://localhost:5000${idea.logo_url}`}
-                alt={idea.company_name}
+                alt={idea.startup_name}
                 className="w-12 h-12 object-cover rounded-xl border border-slate-200 flex-shrink-0"
               />
             ) : (
@@ -73,12 +76,12 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
                 className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold"
                 style={{ backgroundImage: "var(--gradient-brand)" }}
               >
-                {idea.company_name?.charAt(0) || "?"}
+                {idea.startup_name?.charAt(0) || "?"}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="font-extrabold text-lg text-red-900 truncate group-hover:text-indigo-600 transition-colors">
-                {idea.company_name}
+              <h3 className="font-extrabold text-lg text-slate-900   truncate group-hover:text-indigo-600 transition-colors">
+                {idea.startup_name}
               </h3>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white text-[9px] font-bold">
@@ -91,27 +94,34 @@ export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
             </div>
           </div>
 
-          <div className="mb-3">
-            <span className={`inline-block text-[11px] font-semibold  ${catClass}`}>
-              {idea.startup_name?.replace(/\s+/g, "").toUpperCase() ?? "startup_name"}</span>
-          </div>
-
           <p className="text-sm text-slate-600 mb-4 line-clamp-2 min-h-[40px] font-light leading-relaxed">
             {idea.short_description || "Maklumat lanjut akan dikemaskini tidak lama lagi."}
           </p>
 
-          {user?.userType === "company" && (
+          {user?.userType === "company" && ( <>
             <Button
               variant="default"
               size="lg"
-              onClick={(e) => e.stopPropagation()}
+              onClick=
+                {(e) => { e.stopPropagation()
+                setIsOpen(true)}
+                }
               className="inline-flex items-center justify-center bg-white text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-right"
               style={{ backgroundImage: "var(--gradient-brand)" }}
             >
               Tunjukkan Minat
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
+
+            <InterestModal 
+              isOpen={isOpen}
+              onClose={() => setIsOpen(false)} 
+              ideaId={idea.id}
+              startupName={idea.startup_name}
+            />
+            </>
           )}
+
 
           {/* Footer: votes + timestamp */}
           <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">

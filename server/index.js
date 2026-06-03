@@ -7,4 +7,3 @@ app.listen(PORT, () => {
 });
 
 
-console.log("JWT SECRET:", process.env.JWT_SECRET);

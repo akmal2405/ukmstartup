@@ -1,10 +1,12 @@
-import { insertInterest, deleteInterest, getInterestsByIdeaId } from "../models/interestModel.js";
+import { insertInterest, deleteInterest, getInterestsByIdeaId, getInterestsByOwnerId } from "../models/interestModel.js";
 
 export const showInterest = async (req, res) => {
   try {
     const { id: idea_id } = req.params;
     const company_id = req.user.id;
-    const interest = await insertInterest(idea_id, company_id);
+    const { message } = req.body;
+
+    const interest = await insertInterest(idea_id, company_id, message);
     if (interest) {
       res.status(201).json({ message: "Interest shown successfully" });
     } else {
@@ -43,3 +45,12 @@ export const fetchInterests = async (req, res) => {
     res.status(500).json({ message: "Server error when fetching interests" });
   }
 }
+export const fetchMyInterests = async (req, res) => {
+  try {
+    const interests = await getInterestsByOwnerId(req.user.id);
+    res.json(interests);
+  } catch (error) {
+    console.error("GET MY INTERESTS ERROR:", error);
+    res.status(500).json({ error: "Failed to fetch my interests" });
+  }
+};

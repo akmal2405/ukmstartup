@@ -1,5 +1,20 @@
 import pool from "../config/db.js";
 
+export const getIdeasByUserId = async (userId) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM ideas
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+    `,
+      [userId],
+    );
+    return result.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getAllIdeas = async () => {
   try {
     const result = await pool.query(`
@@ -18,19 +33,19 @@ export const getAllIdeas = async () => {
       JOIN users ON ideas.user_id = users.id
       LEFT JOIN comments ON comments.idea_id = ideas.id
       GROUP BY ideas.id, users.full_name
-      ORDER BY ideas.created_at DESC`
-    );
+      ORDER BY ideas.created_at DESC`);
     return result.rows;
   } catch (error) {
     throw error;
   }
 };
 
-
 export const getIdeaById = async (id) => {
   try {
-      const result = await pool.query(`SELECT 
+    const result = await pool.query(
+      `SELECT 
       ideas.id, 
+      ideas.user_id,
       ideas.startup_name, 
       ideas.category,
       ideas.phone_number, 
@@ -38,21 +53,22 @@ export const getIdeaById = async (id) => {
       ideas.cover_image_url,
       ideas.short_description, 
       ideas.status, 
+      ideas.youtube_url,
+      ideas.slides_url,
       users.full_name AS owner_name,  
       COUNT (comments.id) AS comment_count
       FROM ideas 
       JOIN users ON ideas.user_id  = users.id
       LEFT JOIN comments ON comments.idea_id = ideas.id 
       WHERE ideas.id = $1
-      GROUP BY ideas.id, users.full_name`, [id]
-      
+      GROUP BY ideas.id, users.full_name`,
+      [id],
     );
     return result.rows[0];
   } catch (error) {
     throw error;
-  } 
-  };
-
+  }
+};
 
 export const insertIdeas = async (
   userId,
@@ -62,10 +78,9 @@ export const insertIdeas = async (
   logoPath,
   coverPath,
   shortDescription,
-  status
+  status,
 ) => {
   try {
-
     const result = await pool.query(
       `INSERT INTO ideas
        (user_id, startup_name, category, phone_number, logo_url, cover_image_url, short_description, status)
@@ -80,7 +95,23 @@ export const insertIdeas = async (
         coverPath,
         shortDescription,
         status || "draft",
-      ]
+      ],
+    );
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateIdeaPitchDeck = async (ideaId, youtubeUrl, slidesUrl) => {
+  try {
+    const result = await pool.query(
+      `UPDATE ideas
+       SET youtube_url =COALESCE($2, youtube_url), 
+       slides_url = COALESCE($3, slides_url)
+       WHERE id = $1
+       RETURNING*`,
+      [ideaId, youtubeUrl, slidesUrl],
     );
     return result.rows[0];
   } catch (error) {

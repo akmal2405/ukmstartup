@@ -34,7 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Auth check successful, user data:", data);
         setUser(data.user);
       } else {
         localStorage.removeItem("token");

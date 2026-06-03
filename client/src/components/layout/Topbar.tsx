@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { Search, Bell, Plus } from "lucide-react";
+import { Search, Bell, Plus, User, LogOutIcon, LightbulbIcon, CogIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { UserCircleIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../context/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Button } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "../ui/navigation-menu";
+
 export default function Topbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -19,9 +27,9 @@ export default function Topbar() {
 
   return (
     <header className="sticky top-0 z-40 h-16 bg-white/95 backdrop-blur border-b border-slate-200 flex items-center px-4 sm:px-6 gap-4">
-      
-    
-      <a href="/dashboard" className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 shrink-0 ml-80">
+
+
+      <a href="/dashboard" className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 shrink-0 ml-40">
         UKMStartUp
       </a>
 
@@ -34,14 +42,35 @@ export default function Topbar() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari idea, syarikat, atau pengasas…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-full bg-slate-100 text-sm text-slate-700 placeholder:text-slate-400 border border-transparent focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition"
+            className="w-72 pl-10 pr-4 py-2.5 rounded-full bg-slate-100 text-sm text-slate-700 placeholder:text-slate-400 border border-transparent focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition"
           />
         </div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-        
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Dashboard</NavigationMenuTrigger>
+              <NavigationMenuContent>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:flex">
+              <NavigationMenuTrigger>Popular</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                ldknkn
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:flex">
+              <NavigationMenuTrigger>News</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                ldknkn
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+
         {/* Bell */}
         <button className="relative p-2 rounded-full hover:bg-slate-100 text-slate-600 transition">
           <Bell className="w-5 h-5" />
@@ -71,20 +100,26 @@ export default function Topbar() {
           <DropdownMenuContent className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-1 text-sm text-slate-700 shadow-lg z-50 focus:outline-none">
             <DropdownMenuItem>
               <a href="/profile" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
-                <UserCircleIcon className="w-5 h-5 text-slate-400" />
+                <User className="w-5 h-5 text-slate-400" />
                 Profil
               </a>
             </DropdownMenuItem>
             <DropdownMenuItem>
+              <a href="/profile" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
+                <LightbulbIcon className="w-5 h-5 text-slate-400" />
+                My ideas
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
               <a href="/settings" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
-                <Cog6ToothIcon className="w-5 h-5 text-slate-400" />
+                <CogIcon className="w-5 h-5 text-slate-400" />
                 Tetapan
               </a>
             </DropdownMenuItem>
             <div className="my-1 h-px bg-slate-200" />
             <DropdownMenuItem>
               <button onClick={logout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-rose-500 hover:bg-rose-50 transition">
-                <ArrowLeftStartOnRectangleIcon className="w-5 h-5" />
+                <LogOutIcon className="w-5 h-5" />
                 Log Keluar
               </button>
             </DropdownMenuItem>

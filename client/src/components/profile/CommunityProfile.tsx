@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, MessageSquare, TrendingUp, ThumbsUp, MessageCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-
-// ── CONSTANTS (outside component — never changes) ──────────────────────────
+import { Interest, Idea } from "../../types";
 
 const TABS = [
   { id: "ideas", label: "Idea Saya" },
@@ -16,72 +15,49 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "bg-gray-100 text-gray-600",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  approved: "Diluluskan",
-  pending: "Dalam Semakan",
-  rejected: "Ditolak",
-};
-
-// ── DUMMY DATA (replace with real API later) ───────────────────────────────
-
-const dummyIdeas = [
-  {
-    id: 1,
-    company_name: "EduTech Malaysia",
-    category: "Pendidikan",
-    status: "approved",
-    upvotes: 24,
-    comments: 8,
-  },
-  {
-    id: 2,
-    company_name: "HealthSync",
-    category: "Kesihatan",
-    status: "pending",
-    upvotes: 11,
-    comments: 3,
-  },
-];
-
-const dummyInterests = [
-  {
-    id: 1,
-    company_name: "TechCorp Sdn Bhd",
-    industry: "Teknologi",
-    message: "Kami berminat untuk membincangkan peluang pelaburan dalam idea ini.",
-    created_at: "2 hari lepas",
-    email: "contact@techcorp.com",
-  },
-  {
-    id: 2,
-    company_name: "Modal Ventures",
-    industry: "Kewangan",
-    message: "",
-    created_at: "5 hari lepas",
-    email: "hello@modalventures.com",
-  },
-  {
-    id: 3,
-    company_name: "Nexus Industries",
-    industry: "Perniagaan",
-    message: "Idea yang sangat menarik! Kami ingin mengetahui lebih lanjut tentang model perniagaan anda.",
-    created_at: "1 minggu lepas",
-    email: "info@nexus.com.my",
-  },
-];
-
-// ── MAIN COMPONENT ─────────────────────────────────────────────────────────
-
 export default function CommunityProfile() {
-  const { user } = useAuth();
 
-  // which tab is active — default is "ideas"
   const [activeTab, setActiveTab] = useState("ideas");
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const { user } = useAuth();
+  const [interests, setInterests] = useState<Interest[]>([]);
+
+  useEffect(() => {
+    const fetchMyInterests = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/interests/my-interests`, {
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+        const data: Interest[] = await res.json();
+        setInterests(data);
+      } catch (err) {
+        console.error("Error fetching interests:", err);
+      }
+    };
+    fetchMyInterests();
+  }, []);
+
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/my-ideas`, {
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+        const data: Idea[] = await res.json();
+        setIdeas(data);
+      } catch (err) {
+        console.error("Error fetching ideas:", err);
+      }
+    };
+    fetchIdeas();
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto px-4 space-y-6 py-6 bg-white">
 
-      {/* ── PROFILE HEADER ── */}
+      {/* profile */}
       <section className="p-6 bg-white">
         <div className="flex items-center gap-5">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
@@ -102,9 +78,9 @@ export default function CommunityProfile() {
         </div>
       </section>
 
-     
 
-      {/* ── TABS ── */}
+
+      {/* tab bar */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 
         {/* Tab Bar */}
@@ -113,21 +89,17 @@ export default function CommunityProfile() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-3.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                activeTab === tab.id
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
+              className={`px-5 py-3.5 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === tab.id
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+                }`}>
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Tab Content */}
         <div className="p-6">
-
-          {/* ── TAB: IDEA SAYA ── */}
+          {/* my ideas */}
           {activeTab === "ideas" && (
             <div>
               <div className="flex items-center justify-between mb-5">
@@ -137,55 +109,50 @@ export default function CommunityProfile() {
                   Idea Baru
                 </button>
               </div>
-              <div className="space-y-3">
-                {dummyIdeas.map((idea) => (
-                  <div
-                    key={idea.id}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {idea.company_name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900 text-sm truncate">
-                        {idea.company_name}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5">{idea.category}</p>
-                    </div>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[idea.status]}`}>
-                      {STATUS_LABELS[idea.status]}
-                    </span>
-                    <div className="flex items-center gap-3 text-xs text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <ThumbsUp className="w-3.5 h-3.5" /> {idea.upvotes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3.5 h-3.5" /> {idea.comments}
-                      </span>
-                    </div>
+              {ideas.map((ideas) => (
+                <div
+                  key={ideas.id}
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    {ideas.startup_name.charAt(0)}
                   </div>
-                ))}
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 text-sm truncate">
+                      {ideas.startup_name}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">{ideas.category}</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <ThumbsUp className="w-3.5 h-3.5" /> {ideas.upvote_count}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-3.5 h-3.5" /> {ideas.comment_count}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* ── TAB: MINAT INDUSTRI ── */}
+          {/* minat industri */}
           {activeTab === "interest" && (
             <div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-bold text-slate-900">Minat Industri</h2>
                 <span className="text-sm font-semibold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">
-                  {dummyInterests.length} syarikat
+                  {interests?.length || 0} syarikat
                 </span>
               </div>
 
-              {dummyInterests.length === 0 ? (
+              {interests.length === 0 ? (
                 <div className="text-center py-8 text-slate-400 text-sm">
                   Belum ada syarikat yang menunjukkan minat.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {dummyInterests.map((interest) => (
+                  {interests.map((interest) => (
                     <div
                       key={interest.id}
                       className="flex items-start gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50"
@@ -231,7 +198,6 @@ export default function CommunityProfile() {
             </div>
           )}
 
-          {/* ── TAB: TENTANG ── */}
           {activeTab === "about" && (
             <div>
               <h2 className="text-lg font-bold text-slate-900 mb-4">Tentang</h2>
@@ -245,17 +211,14 @@ export default function CommunityProfile() {
                   <span className="font-medium text-slate-900 capitalize">{user?.communityRole || "—"}</span>
                 </div>
                 <div className="flex gap-3">
-                  <span className="text-slate-400 w-24 flex-shrink-0">Institusi</span>
-                  <span className="font-medium text-slate-900">UKM</span>
-                </div>
-                <div className="flex gap-3">
                   <span className="text-slate-400 w-24 flex-shrink-0">Emel</span>
                   <span className="font-medium text-slate-900">{user?.email || "—"}</span>
                 </div>
               </div>
             </div>
-          )}
 
+
+          )}
         </div>
       </div>
     </div>
