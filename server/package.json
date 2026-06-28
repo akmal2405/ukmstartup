@@ -25,7 +25,8 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^9.0.1",
-    "pg": "^8.17.1"
+    "pg": "^8.17.1",
+    "resend": "^6.16.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11",

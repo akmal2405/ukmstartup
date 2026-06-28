@@ -1,30 +1,12 @@
-import nodemailer from "nodemailer";
-import dns from "node:dns";
-dns.setDefaultResultOrder("ipv4first");
+import { Resend } from "resend";
 
-let transporter = null;
-
-function getTransporter() {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      family: 4,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  }
-  return transporter;
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendPasswordResetEmail(toEmail, token) {
   const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
 
-  await getTransporter().sendMail({
-    from: `"UKMStartUp" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "UKMStartUp <onboarding@resend.dev>",
     to: toEmail,
     subject: "Reset your UKMStartUp password",
     html: `
@@ -55,8 +37,8 @@ export async function sendPasswordResetEmail(toEmail, token) {
 export async function sendVerificationEmail(toEmail, token) {
   const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
 
-  await getTransporter().sendMail({
-    from: `"UKMStartUp" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "UKMStartUp <onboarding@resend.dev>",
     to: toEmail,
     subject: "Verify your UKMStartUp email",
     html: `
