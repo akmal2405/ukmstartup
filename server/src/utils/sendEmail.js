@@ -6,7 +6,7 @@ export async function sendPasswordResetEmail(toEmail, token) {
   const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
 
   await resend.emails.send({
-    from: "UKMStartUp <onboarding@resend.dev>",
+    from: "UKMStartUp <noreply@ukmstartup.xyz>",
     to: toEmail,
     subject: "Reset your UKMStartUp password",
     html: `
