@@ -91,12 +91,6 @@ export const signup = async (req, res) => {
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await setVerificationToken(user.id, verificationToken, verificationExpires);
 
-    try {
-      await sendVerificationEmail(user.email, verificationToken);
-    } catch (emailError) {
-      console.error("Verification email failed:", emailError.message);
-    }
-
     res.status(201).json({
       message: "Account created! Please check your email to verify your account before logging in.",
       user: {
@@ -104,6 +98,10 @@ export const signup = async (req, res) => {
         email: user.email,
         userType: user.userType,
       },
+    });
+
+    sendVerificationEmail(user.email, verificationToken).catch((emailError) => {
+      console.error("Verification email failed:", emailError.message);
     });
   } catch (error) {
     console.error("Signup error:", error);
