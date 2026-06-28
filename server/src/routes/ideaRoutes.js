@@ -1,35 +1,38 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
+import CloudinaryStorage from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
 import {
-  createIdeas,
+  createIdea,
   getIdeas,
   getIdea,
   getMyIdeas,
+  deleteIdea,
   updatePitchDeck,
+  getTopVotedIdeas,
+  fetchRelatedIdeas,
+  clearPitchField,
+  search,
 } from "../controllers/ideaController.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
-/* ---------- MULTER CONFIG ---------- */
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "image/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+/* ---------- MULTER + CLOUDINARY CONFIG ---------- */
+const imageStorage = new CloudinaryStorage({
+  cloudinary: { v2: cloudinary },
+  params: {
+    folder: "ideas/images",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
 const upload = multer({ storage: imageStorage });
 
-const slidesStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "slides/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+const slidesStorage = new CloudinaryStorage({
+  cloudinary: { v2: cloudinary },
+  params: {
+    folder: "ideas/slides",
   },
 });
 
@@ -38,13 +41,26 @@ const uploadSlides = multer({ storage: slidesStorage });
 /* ---------- ROUTES ---------- */
 
 router.get("/my-ideas", protect, getMyIdeas);
+router.get("/top-voted", getTopVotedIdeas);
+router.get("/search", search);
+router.get("/:id/related", fetchRelatedIdeas);
 router.get("/:id", getIdea);
+router.delete("/:id", deleteIdea);
 router.put(
   "/:id/pitch",
   protect,
+  (req, res, next) => {
+    console.log("reacjhed");
+    next();
+  },
   uploadSlides.single("slides"),
+  (req, res, next) => {
+    console.log("fniished");
+    next();
+  },
   updatePitchDeck,
 );
+router.patch("/:id/pitch/clear", protect, clearPitchField);
 router.get("/", getIdeas);
 
 router.post(
@@ -54,7 +70,7 @@ router.post(
     { name: "logo", maxCount: 1 },
     { name: "cover", maxCount: 1 },
   ]),
-  createIdeas,
+  createIdea,
 );
 
 router.post(

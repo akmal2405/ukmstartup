@@ -16,7 +16,7 @@ interface AiResultCardProps {
   aiLoading: boolean;
   formData?: {
     startupName: string;
-    category: string; 
+    category: string;
     shortDescription: string;
   };
   logoPreview?: string | null;
@@ -27,17 +27,17 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-slate-900">Idea Berjaya Dihantar!</h2>
-        <p className="text-slate-500 mt-2">AI sedang menilai idea anda...</p>
+        <h2 className="text-2xl font-bold text-slate-900">Idea Submitted Successfully!</h2>
+        <p className="text-slate-500 mt-2">AI is evaluating your idea...</p>
       </div>
 
       {aiLoading && (
         <div className="p-6 bg-indigo-50 rounded-xl text-center border border-indigo-100">
           <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-indigo-600 font-medium">AI sedang menilai idea anda...</p>
-          <p className="text-xs text-indigo-400 mt-1">Ini mengambil masa 5-10 saat</p>
+          <p className="text-sm text-indigo-600 font-medium">AI is evaluating your idea...</p>
+          <p className="text-xs text-indigo-400 mt-1">This takes about 5–10 seconds</p>
         </div>
       )}
 
@@ -52,7 +52,7 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-slate-900">Penilaian AI</h3>
+                <h3 className="text-lg font-bold text-slate-900">AI Evaluation</h3>
               </div>
               <span className={`text-lg font-black px-4 py-1.5 rounded-full ${aiResult.score >= 7 ? "bg-emerald-50 text-emerald-700" :
                 aiResult.score >= 5 ? "bg-amber-50 text-amber-700" :
@@ -69,7 +69,7 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
               {/* Strengths */}
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
-                  Kekuatan
+                  Strengths
                 </p>
                 <ul className="space-y-2">
                   {aiResult.strengths.map((s, i) => (
@@ -84,7 +84,7 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
               {/* Improvements */}
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
-                  Cadangan Penambahbaikan
+                  Improvement Suggestions
                 </p>
                 <ul className="space-y-2">
                   {aiResult.improvements.map((imp, i) => (
@@ -101,8 +101,8 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
                 aiResult.verdict === "Berpotensi Sederhana" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                   "bg-red-50 text-red-700 border border-red-200"
                 }`}>
-                {aiResult.verdict === "Berpotensi Tinggi" ? "🚀" :
-                  aiResult.verdict === "Berpotensi Sederhana" ? "⚡" : "💡"} {aiResult.verdict}
+                {aiResult.verdict === "Berpotensi Tinggi" ? "" :
+                  aiResult.verdict === "Berpotensi Sederhana" ? "" : ""} {aiResult.verdict}
               </div>
             </div>
 
@@ -113,22 +113,23 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
                 className="flex-1"
                 onClick={() => navigate("/dashboard")}
               >
-                Lihat Dashboard
+                Go to Dashboard
               </Button>
               <Button
                 className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
-                onClick={() => {navigate("/dashboard"); onReset()
+                onClick={() => {
+                  navigate("/dashboard"); onReset()
                 }}
               >
-                Hantar Idea Lain
+                Submit Another Idea
               </Button>
             </div>
           </div>
-          </div>
+        </div>
       )}
       {!aiLoading && !aiResult && (
         <div className="p-6 bg-yellow-50 rounded-xl text-center border border-yellow-100">
-          <p className="text-sm text-yellow-600 font-medium">Tiada hasil AI untuk dipaparkan.</p>
+          <p className="text-sm text-yellow-600 font-medium">No AI result to display.</p>
         </div>
       )}
     </div>

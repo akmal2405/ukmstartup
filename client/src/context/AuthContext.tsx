@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
-        
+
       });
 
       if (response.ok) {
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/";
+    window.location.replace("/login");
   };
 
   return (

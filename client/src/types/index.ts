@@ -1,56 +1,95 @@
 export interface User {
-  id: number;
+  id: string; // uuid
   email: string;
   fullName: string;
   userType: "community" | "company";
-  communityRole?: "student" | "lecturer" | "staff";
+  communityRole?: "student" | "lecturer" | "staff" | "admin";
   companyName?: string;
   industry?: string;
   contactPerson?: string;
   phone?: string;
+  createdAt?: string;
+  profilePicture?: string;
+  location?: string;
 }
 
 export interface Idea {
-  id: number;
-  user_id: number;
-  startup_name: string;
+  id: string; // uuid
+  userId: string; // uuid
+  startupName: string;
   category: string;
-  short_description: string;
-  cover_image_url?: string;
-  logo_url?: string;
-  owner_name: string;
-  created_at: string;
+  shortDescription: string;
+  coverImageUrl?: string;
+  logoUrl?: string;
+  ownerName: string;
+  ownerProfilePicture?: string;
+  createdAt: string;
   status: "pending" | "approved" | "rejected";
-  comment_count: number;
-  downvote_count: number;
-  upvote_count: number;
-  youtube_url?: string;
-  slides_url?: string;
+  commentCount: number;
+  downvoteCount: number;
+  upvoteCount: number;
+  youtubeUrl?: string;
+  slidesUrl?: string;
+  hasPitchDeck?: boolean;
+  interestCount?: number;
+  phoneNumber?: string;
 }
 
 export interface Comment {
-  id: number;
-  idea_id: number;
-  user_id: number;
+  id: string;
+  ideaId: string;
+  userId: string;
   content: string;
-  author_name: string;
-  created_at: string;
+  authorName: string;
+  createdAt: string;
+  authorPicture: string;
+  companyName: string;
 }
 
 export type VoteType = "up" | "down";
 
 export interface VoteResponse {
-  net_score: number;
-  user_vote: VoteType | null;
+  netScore: number;
+  userVote: VoteType | null;
 }
+
+export type InterestStatus =
+  | "pending"
+  | "contacted"
+  | "in_discussion"
+  | "declined"
+  | "closed";
 
 export interface Interest {
   id: string;
-  idea_id: string;
-  company_id: string;
-  company_name: string;
+  ideaId: string;
+  companyId: string;
+  companyName: string;
   industry: string;
   email: string;
   message: string | null;
-  created_at: string;
+  createdAt: string;
+  status: InterestStatus;
+  statusUpdatedAt: string | null;
+  ideaName: string;
+  profilePicture?: string;
+}
+
+export interface SentInterest {
+  id: string;
+  ideaId: string;
+  companyId: string;
+  ideaName: string;
+  message: string | null;
+  createdAt: string;
+  status: InterestStatus;
+  statusUpdatedAt: string | null;
+  ownerEmail: string | null;
+}
+
+export interface TopIdea {
+  id: string;
+  startupName: string;
+  logoUrl: string | null;
+  upvoteCount: number;
 }

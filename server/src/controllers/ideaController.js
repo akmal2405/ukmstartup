@@ -3,12 +3,19 @@ import {
   insertIdeas,
   getIdeaById,
   getIdeasByUserId,
+  deleteIdea as deleteIdeaById,
   updateIdeaPitchDeck,
+  fetchTopVotedIdeas,
+  getRelatedIdeas,
+  clearIdeaPitchField,
+  searchIdeas,
 } from "../models/ideaModel.js";
+import { searchCompanies } from "../models/userModel.js";
 
 export const getIdeas = async (req, res) => {
   try {
-    const ideas = await getAllIdeas();
+    const { category } = req.query;
+    const ideas = await getAllIdeas(category || null);
     res.json(ideas);
   } catch (error) {
     console.error("GET IDEAS ERROR:", error);
@@ -16,15 +23,11 @@ export const getIdeas = async (req, res) => {
   }
 };
 
-export const createIdeas = async (req, res) => {
+export const createIdea = async (req, res) => {
   try {
-    const logoPath = req.files?.logo
-      ? `/image/${req.files.logo[0].filename}`
-      : null;
+    const logoPath = req.files?.logo ? req.files.logo[0].secure_url : null;
 
-    const coverPath = req.files?.cover
-      ? `/image/${req.files.cover[0].filename}`
-      : null;
+    const coverPath = req.files?.cover ? req.files.cover[0].secure_url : null;
 
     const { startupName, category, phoneNumber, shortDescription, status } =
       req.body;
@@ -42,7 +45,7 @@ export const createIdeas = async (req, res) => {
     res.status(201).json(idea);
   } catch (error) {
     console.error("CREATE IDEA ERROR:", error.message);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to create idea" });
   }
 };
 
@@ -61,7 +64,18 @@ export const getIdea = async (req, res) => {
 
 //export const updateIdea = async (req, res) => //
 
-//export const deleteIdea = async (req, res) => //
+export const deleteIdea = async (req, res) => {
+  try {
+    const idea = await deleteIdeaById(req.params.id);
+    if (!idea) {
+      return res.status(404).json({ error: "idea not found" });
+    }
+    res.json(idea);
+  } catch (error) {
+    console.error("ERROR TO DELETE IDEA:", error);
+    res.status(500).json({ error: "failed to delete idea" });
+  }
+};
 
 export const getMyIdeas = async (req, res) => {
   try {
@@ -75,8 +89,11 @@ export const getMyIdeas = async (req, res) => {
 
 export const updatePitchDeck = async (req, res) => {
   try {
+    console.log("controller reach");
+    console.log(req.file);
     const { youtube_url } = req.body;
-    const slidesUrl = req.file ? `/slides/${req.file.filename}` : null;
+    const slidesUrl = req.file ? req.file.secure_url : null;
+    console.log("slidesUrl:", slidesUrl);
     const ideaId = req.params.id;
 
     const updatedIdea = await updateIdeaPitchDeck(
@@ -88,5 +105,62 @@ export const updatePitchDeck = async (req, res) => {
   } catch (error) {
     console.error("UPDATE PITCH DECK ERROR:", error);
     res.status(500).json({ error: "Failed to update pitch deck" });
+  }
+};
+
+export const getTopVotedIdeas = async (req, res) => {
+  try {
+    const data = await fetchTopVotedIdeas();
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching top voted ideas:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const clearPitchField = async (req, res) => {
+  try {
+    const { field } = req.body;
+    const ALLOWED = ["youtube_url", "slides_url"];
+    if (!ALLOWED.includes(field)) {
+      return res.status(400).json({ message: "Invalid field" });
+    }
+    const result = await clearIdeaPitchField(req.params.id, field, req.user.id);
+    if (result.rowCount === 0) {
+      return res
+        .status(404)
+        .json({ message: "Idea not found or not authorized" });
+    }
+    res.json({ message: "Field cleared" });
+  } catch (error) {
+    console.error("CLEAR PITCH FIELD ERROR:", error);
+    res.status(500).json({ error: "Failed to clear field" });
+  }
+};
+
+export const fetchRelatedIdeas = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const idea = await getIdeaById(id);
+    const related = await getRelatedIdeas(idea.category, id);
+    res.json(related);
+  } catch (err) {
+    console.log("error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const search = async (req, res) => {
+  const q = (req.query.q || "").trim();
+  if (!q) return res.json({ ideas: [], companies: [] });
+  try {
+    const [ideas, companies] = await Promise.all([
+      searchIdeas(q),
+      searchCompanies(q),
+    ]);
+    res.json({ ideas, companies });
+  } catch (error) {
+    console.error("SEARCH ERROR:", error);
+    res.status(500).json({ error: "Search failed" });
   }
 };

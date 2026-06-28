@@ -26,9 +26,9 @@ export function useIdeas(query: string, activeCat: string) {
       const matchCat = activeCat === "Semua" || i.category === activeCat;
       const q = query.trim().toLowerCase();
       return matchCat && (!q ||
-        i.startup_name?.toLowerCase().includes(q) ||
-        i.owner_name?.toLowerCase().includes(q) ||
-        i.short_description?.toLowerCase().includes(q)
+        i.startupName?.toLowerCase().includes(q) ||
+        i.ownerName?.toLowerCase().includes(q) ||
+        i.shortDescription?.toLowerCase().includes(q)
       );
     });
   }, [ideas, query, activeCat]);

@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import IdeaPreviewCard from "./ideaPreviewCard";
 
-const CATEGORIES = ["Teknologi", "Perniagaan", "Pendidikan", "Kesihatan", "Kewangan", "Sosial"];
+import { CATEGORIES, CATEGORY_LABELS } from "../../constants/categories";
+const ALL_CATEGORIES = [...CATEGORIES, "Sosial"];
 
 interface CreateIdeaFormProps {
   onSuccess?: () => void;
@@ -112,7 +113,7 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
 
     } catch (error) {
       console.error(error);
-      alert("Gagal menghantar idea. Cuba lagi.");
+      alert("Failed to submit idea. Please try again.");
     } finally {
       setIsLoading(false);
       setAiLoading(false);
@@ -148,9 +149,11 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Hantar Idea Baru</h1>
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+            Submit New Idea
+          </h1>
           <p className="text-slate-500 mt-1">
-            Kongsi idea startup anda dengan komuniti UKMStartUp.
+            Share your startup idea with the UKMStartUp community.
           </p>
         </div>
       </div>
@@ -161,12 +164,12 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
           {/* Section 1: Basic Info */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
             <header className="mb-5">
-              <h2 className="text-base font-semibold text-slate-900">Maklumat Asas</h2>
-              <p className="text-sm text-slate-500">Nama, kategori, dan cara orang boleh hubungi anda.</p>
+              <h2 className="text-base font-semibold text-slate-900">Basic Information</h2>
+              <p className="text-sm text-slate-500">Name, category, and how people can reach you.</p>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="startupName">Nama Startup</Label>
+                <Label htmlFor="startupName">Startup Name</Label>
                 <Input
                   className="border-slate-300 placeholder:text-slate-500"
                   id="startupName"
@@ -178,25 +181,25 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Kategori</Label>
+                <Label htmlFor="category">Category</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
                 >
                   <SelectTrigger className="border-slate-300 bg-white justify-between w-full" id="category">
-                    <SelectValue placeholder="Pilih kategori" />
+                    <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-300 bg-white" position="popper" side="bottom">
                     <SelectGroup>
-                      {CATEGORIES.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      {ALL_CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</SelectItem>
                       ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Nombor Telefon</Label>
+                <Label htmlFor="phoneNumber">Phone Number</Label>
                 <Input
                   className="border-slate-300 placeholder:text-slate-500"
                   id="phoneNumber"
@@ -212,20 +215,20 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
           {/* Section 2: Branding */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
             <header className="mb-5">
-              <h2 className="text-base font-semibold text-slate-900">Penjenamaan</h2>
-              <p className="text-sm text-slate-500">Logo dan gambar muka depan untuk idea anda.</p>
+              <h2 className="text-base font-semibold text-slate-900">Branding</h2>
+              <p className="text-sm text-slate-500">Logo and cover image for your idea.</p>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Loga</Label>
+                <Label>Logo</Label>
                 <label className="group relative flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50/50 transition cursor-pointer overflow-hidden">
                   {logoPreview ? (
                     <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain" />
                   ) : (
                     <div className="text-center">
                       <ImagePlus className="w-7 h-7 text-slate-400 mx-auto mb-2 group-hover:text-indigo-500" />
-                      <p className="text-sm font-medium text-slate-700">Muat naik logo</p>
-                      <p className="text-xs text-slate-400">PNG, JPG · disyorkan 1:1</p>
+                      <p className="text-sm font-medium text-slate-700">Upload logo</p>
+                      <p className="text-xs text-slate-400">PNG, JPG · recommended 1:1</p>
                     </div>
                   )}
                   <input
@@ -237,15 +240,15 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
                 </label>
               </div>
               <div className="space-y-2">
-                <Label>Gambar Muka Depan</Label>
+                <Label>Cover Image</Label>
                 <label className="group relative flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50/50 transition cursor-pointer overflow-hidden">
                   {coverPreview ? (
                     <img src={coverPreview} alt="Cover preview" className="h-full w-full object-cover" />
                   ) : (
                     <div className="text-center">
                       <Upload className="w-7 h-7 text-slate-400 mx-auto mb-2 group-hover:text-indigo-500" />
-                      <p className="text-sm font-medium text-slate-700">Muat naik kover</p>
-                      <p className="text-xs text-slate-400">PNG, JPG · disyorkan 16:9</p>
+                      <p className="text-sm font-medium text-slate-700">Upload cover</p>
+                      <p className="text-xs text-slate-400">PNG, JPG · recommended 16:9</p>
                     </div>
                   )}
                   <input
@@ -262,11 +265,11 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
           {/* Section 3: Description */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
             <header className="mb-5">
-              <h2 className="text-base font-semibold text-slate-900">Penerangan</h2>
-              <p className="text-sm text-slate-500">Terangkan idea anda secara ringkas dan menarik.</p>
+              <h2 className="text-base font-semibold text-slate-900">Description</h2>
+              <p className="text-sm text-slate-500">Describe your idea concisely and compellingly.</p>
             </header>
             <div className="space-y-2 border-slate-200 pt-4">
-              <Label htmlFor="shortDescription">Penerangan Ringkas</Label>
+              <Label htmlFor="shortDescription">Short Description</Label>
               <Textarea
                 className="border-slate-300 placeholder:text-slate-500"
                 id="shortDescription"
@@ -274,7 +277,7 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
                 value={formData.shortDescription}
                 onChange={handleChange}
                 rows={6}
-                placeholder="Apa masalah yang anda selesaikan? Untuk siapa? Mengapa ia penting?"
+                placeholder="What problem are you solving? For whom? Why does it matter?"
                 maxLength={280}
                 required
               />

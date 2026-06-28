@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Mail, Lock, User, Building2, Users } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 interface FormData {
   email: string;
@@ -21,7 +20,6 @@ interface FormData {
 export default function Register() {
   const { type } = useParams<{ type: string }>();
   const navigate = useNavigate();
-  const { setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState<FormData>({
@@ -47,6 +45,13 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    const UKM_EMAIL_REGEX = /^[\w.+-]+@(siswa\.)?ukm\.edu\.my$/i;
+    if (!UKM_EMAIL_REGEX.test(formData.email)) {
+      setError("Please use a valid UKM email address (e.g. yourname@siswa.ukm.edu.my)");
+      setLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -76,9 +81,7 @@ export default function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.token);
-        setUser(data.user);
-        navigate("/dashboard");
+        navigate("/login", { state: { message: data.message } });
       } else {
         setError(data.message || "Signup failed");
       }
@@ -118,9 +121,7 @@ export default function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.token);
-        setUser(data.user);
-        navigate("/dashboard");
+        navigate("/login", { state: { message: data.message } });
       } else {
         setError(data.message || "Signup failed");
       }
@@ -139,15 +140,15 @@ export default function Register() {
             onClick={() => navigate("/signup")}
             className="text-gray-600 hover:text-gray-800 mb-6 flex items-center gap-2"
           >
-            ← Kembali
+            ← Back
           </button>
 
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-blue-600" />
+            <div className="w-16 h-16 bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 " />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Daftar Akaun</h2>
-            <p className="text-gray-600">Komuniti UKM</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h2>
+            <p className="text-gray-600">UKM Community</p>
           </div>
 
           {error && (
@@ -158,7 +159,7 @@ export default function Register() {
 
           <form onSubmit={handleCommunitySignup}>
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Penuh *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
               <div className="relative">
                 <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                 <input
@@ -174,7 +175,7 @@ export default function Register() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email UKM *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">UKM Email *</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                 <input
@@ -190,20 +191,19 @@ export default function Register() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Peranan *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Role *</label>
               <div className="grid grid-cols-3 gap-3">
                 {["student", "lecturer", "staff"].map((role) => (
                   <button
                     key={role}
                     type="button"
                     onClick={() => setFormData({ ...formData, communityRole: role })}
-                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
-                      formData.communityRole === role
-                        ? "bg-blue-600 text-white shadow-md"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className={`py-3 px-4 rounded-lg font-medium transition-all ${formData.communityRole === role
+                      ? "bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] text-white shadow-md"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
-                    {role === "student" ? "Pelajar" : role === "lecturer" ? "Pensyarah" : "Staf"}
+                    {role === "student" ? "Student" : role === "lecturer" ? "Lecturer" : "Staff"}
                   </button>
                 ))}
               </div>
@@ -211,7 +211,7 @@ export default function Register() {
 
             {formData.communityRole === "student" && (
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Nombor Matrik *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Matric Number *</label>
                 <input
                   type="text"
                   name="matricNumber"
@@ -225,7 +225,7 @@ export default function Register() {
             )}
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Kata Laluan *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                 <input
@@ -235,13 +235,13 @@ export default function Register() {
                   onChange={handleInputChange}
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="Minimum 6 aksara"
+                  placeholder="Minimum 6 characters"
                 />
               </div>
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Sahkan Kata Laluan *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password *</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                 <input
@@ -251,7 +251,7 @@ export default function Register() {
                   onChange={handleInputChange}
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="Masukkan semula kata laluan"
+                  placeholder="Re-enter your password"
                 />
               </div>
             </div>
@@ -259,15 +259,15 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Mendaftar..." : "Daftar Sekarang"}
+              {loading ? "Registering..." : "Register Now"}
             </button>
           </form>
 
           <p className="text-center mt-6 text-sm text-gray-600">
-            Sudah mempunyai akaun?{" "}
-            <a href="/" className="text-blue-600 font-semibold hover:underline">Log Masuk</a>
+            Already have an account?{" "}
+            <a href="/" className="font-semibold hover:underline">Log In</a>
           </p>
         </div>
       </div>
@@ -281,15 +281,15 @@ export default function Register() {
           onClick={() => navigate("/signup")}
           className="text-gray-600 hover:text-gray-800 mb-6"
         >
-          ← Kembali
+          ← Back
         </button>
 
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-8 h-8 text-indigo-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Daftar Syarikat</h2>
-          <p className="text-gray-600">Rakan Industri</p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Register Company</h2>
+          <p className="text-gray-600">Industry Partner</p>
         </div>
 
         {error && (
@@ -300,7 +300,7 @@ export default function Register() {
 
         <form onSubmit={handleCompanySignup}>
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Syarikat *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name *</label>
             <input
               type="text"
               name="companyName"
@@ -313,7 +313,7 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Industri *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Industry *</label>
             <input
               type="text"
               name="industry"
@@ -321,12 +321,12 @@ export default function Register() {
               onChange={handleInputChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-              placeholder="Teknologi, Kewangan, dll"
+              placeholder="Technology, Finance, etc."
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Wakil *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Representative Name *</label>
             <input
               type="text"
               name="contactPerson"
@@ -339,7 +339,7 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Email Syarikat *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Company Email *</label>
             <input
               type="email"
               name="businessEmail"
@@ -352,7 +352,7 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nombor Telefon *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
             <input
               type="tel"
               name="phone"
@@ -365,7 +365,7 @@ export default function Register() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Kata Laluan *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
             <input
               type="password"
               name="companyPassword"
@@ -373,7 +373,7 @@ export default function Register() {
               onChange={handleInputChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-              placeholder="Minimum 6 aksara"
+              placeholder="Minimum 6 characters"
             />
           </div>
 
@@ -382,13 +382,13 @@ export default function Register() {
             disabled={loading}
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
           >
-            {loading ? "Mendaftar..." : "Daftar Syarikat"}
+            {loading ? "Registering..." : "Register Company"}
           </button>
         </form>
 
         <p className="text-center mt-6 text-sm text-gray-600">
-          Sudah mempunyai akaun?{" "}
-          <a href="/" className="text-indigo-600 font-semibold hover:underline">Log Masuk</a>
+          Already have an account?{" "}
+          <a href="/" className="text-indigo-600 font-semibold hover:underline">Log In</a>
         </p>
       </div>
     </div>

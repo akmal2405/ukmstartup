@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil } from "lucide-react";
+import { Pencil, FileText, Video, Trash2, Minus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function PitchDeck() {
   const { user } = useAuth();
@@ -17,12 +18,23 @@ export default function PitchDeck() {
   const [loading, setLoading] = useState(true);
   const [tabs, setTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-  const [showAddTab, setShowAddTab] = useState(false);
+
+  // Single dialog, two modes
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editMode, setEditMode] = useState<"choose" | "section" | "materials" | "delete">("choose");
+  const [deletingItem, setDeletingItem] = useState<string | null>(null);
+
   const [newTabTitle, setNewTabTitle] = useState("");
   const [newTabContent, setNewTabContent] = useState("");
-  const [editingOverview, setEditingOverview] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [slidesFile, setSlidesFile] = useState<File | null>(null);
+  const [related, setRelated] = useState([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${id}/related`)
+      .then(r => r.json())
+      .then(setRelated);
+  }, [id]);
 
   useEffect(() => {
     const fetchIdea = async () => {
@@ -30,7 +42,7 @@ export default function PitchDeck() {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${id}`);
         const data: Idea = await res.json();
         setIdea(data);
-        setYoutubeUrl(data.youtube_url || "");
+        setYoutubeUrl(data.youtubeUrl || "");
       } catch (err) {
         console.error("Error fetching idea:", err);
       } finally {
@@ -53,6 +65,11 @@ export default function PitchDeck() {
     fetchTabs();
   }, [id]);
 
+  const closeDialog = () => {
+    setShowEditDialog(false);
+    setEditMode("choose");
+  };
+
   const handleAddTab = async () => {
     if (!newTabTitle.trim()) return;
     try {
@@ -69,9 +86,55 @@ export default function PitchDeck() {
       setTabs([...tabs, newTab]);
       setNewTabTitle("");
       setNewTabContent("");
-      setShowAddTab(false);
+      closeDialog();
     } catch (err) {
       console.error("Error creating tab:", err);
+    }
+  };
+
+  const handleDeleteTab = async (tabId: number) => {
+    setDeletingItem(`tab-${tabId}`);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/ideas/${id}/tabs/${tabId}`,
+        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.ok) {
+        setTabs((prev) => prev.filter((t) => t.id !== tabId));
+        if (activeTab === String(tabId)) setActiveTab("overview");
+      }
+    } finally {
+      setDeletingItem(null);
+    }
+  };
+
+  const handleClearField = async (field: "youtube_url" | "slides_url") => {
+    setDeletingItem(field);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/ideas/${id}/pitch/clear`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ field }),
+        },
+      );
+      if (res.ok) {
+        setIdea((prev) =>
+          prev
+            ? {
+                ...prev,
+                youtubeUrl: field === "youtube_url" ? undefined : prev.youtubeUrl,
+                slidesUrl: field === "slides_url" ? undefined : prev.slidesUrl,
+              }
+            : prev,
+        );
+        if (field === "youtube_url") setYoutubeUrl("");
+      }
+    } finally {
+      setDeletingItem(null);
     }
   };
 
@@ -88,7 +151,7 @@ export default function PitchDeck() {
       });
       const updated: Idea = await res.json();
       setIdea(updated);
-      setEditingOverview(false);
+      closeDialog();
     } catch (err) {
       console.error("Error saving overview:", err);
     }
@@ -108,12 +171,12 @@ export default function PitchDeck() {
       </div>
     );
 
-  const isOwner = user?.id === idea?.user_id;
+  const isOwner = user?.id === idea?.userId;
 
   const youtubeEmbedUrl = (() => {
-    if (!idea.youtube_url) return null;
-    const m = idea.youtube_url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
-    return m ? `https://www.youtube.com/embed/${m[1]}` : idea.youtube_url;
+    if (!idea.youtubeUrl) return null;
+    const m = idea.youtubeUrl.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+    return m ? `https://www.youtube.com/embed/${m[1]}` : idea.youtubeUrl;
   })();
 
   return (
@@ -126,26 +189,26 @@ export default function PitchDeck() {
 
             {/* Header */}
             <div className="flex items-start gap-4">
-              {idea.logo_url ? (
+              {idea.logoUrl ? (
                 <img
-                  src={`http://localhost:5000${idea.logo_url}`}
-                  alt={idea.startup_name}
+                  src={idea.logoUrl!}
+                  alt={idea.startupName}
                   className="w-16 h-16 rounded-xl object-cover bg-gray-100 flex-shrink-0"
                 />
               ) : (
                 <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0">
                   <span className="text-xl font-bold text-gray-500">
-                    {idea.startup_name?.charAt(0)}
+                    {idea.startupName?.charAt(0)}
                   </span>
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-bold text-gray-900">{idea.startup_name}</h1>
-                <p className="text-gray-500 text-sm mt-1">{idea.short_description}</p>
+                <h1 className="text-2xl font-bold text-slate-900">{idea.startupName}</h1>
+                <p className="text-sm text-slate-600 mt-1">{idea.shortDescription}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs text-blue-600 uppercase font-semibold">{idea.category}</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-xs text-gray-500">by {idea.owner_name}</span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-xs text-slate-400">by {idea.ownerName}</span>
                 </div>
               </div>
             </div>
@@ -156,7 +219,7 @@ export default function PitchDeck() {
                 <button
                   onClick={() => setActiveTab("overview")}
                   className={`px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === "overview"
-                    ? "border-indigo-600 text-slate-900"
+                    ? "border-[#D4609A] text-slate-900"
                     : "border-transparent text-slate-500 hover:text-slate-700"
                     }`}
                 >
@@ -167,7 +230,7 @@ export default function PitchDeck() {
                     key={tab.id}
                     onClick={() => setActiveTab(String(tab.id))}
                     className={`px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === String(tab.id)
-                      ? "border-indigo-600 text-slate-900"
+                      ? "border-[#D4609A] text-slate-900"
                       : "border-transparent text-slate-500 hover:text-slate-700"
                       }`}
                   >
@@ -176,10 +239,10 @@ export default function PitchDeck() {
                 ))}
                 {isOwner && (
                   <button
-                    onClick={() => setShowAddTab(true)}
-                    className="ml-auto inline-flex items-center gap-1 px-3 py-3 text-sm text-slate-500 hover:text-indigo-600"
+                    onClick={() => setShowEditDialog(true)}
+                    className="ml-auto inline-flex items-center gap-1 px-3 py-3 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
                   >
-                    <Plus className="h-4 w-4" /> Add Section
+                    <Pencil className="h-3.5 w-3.5" /> Edit Pitch Deck
                   </button>
                 )}
               </div>
@@ -188,70 +251,24 @@ export default function PitchDeck() {
               <div className="py-6">
                 {activeTab === "overview" && (
                   <div className="flex flex-col gap-6">
-                    {isOwner && !editingOverview && (
-                      <div className="flex justify-end">
-                        <button
-                          onClick={() => setEditingOverview(true)}
-                          className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-                        >
-                          <Pencil className="h-3.5 w-3.5" /> Edit Pitch Deck
-                        </button>
+                    {youtubeEmbedUrl && (
+                      <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black">
+                        <iframe
+                          src={youtubeEmbedUrl}
+                          title="Pitch video"
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
                       </div>
                     )}
-                    {editingOverview ? (
-                      <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
-                        <div>
-                          <label className="text-sm font-medium text-slate-700">YouTube URL</label>
-                          <Input
-                            value={youtubeUrl}
-                            onChange={(e) => setYoutubeUrl(e.target.value)}
-                            placeholder="https://www.youtube.com/watch?v=..."
-                            className="mt-1 bg-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-slate-700">Upload Slides (PDF)</label>
-                          <input
-                            type="file"
-                            accept="application/pdf"
-                            onChange={(e) => setSlidesFile(e.target.files?.[0] || null)}
-                            className="mt-1 block w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
-                          />
-                        </div>
-                        <div className="flex gap-2 pt-1">
-                          <Button onClick={handleSaveOverview} className="bg-indigo-600 hover:bg-indigo-700 text-white">Save</Button>
-                          <Button variant="outline" onClick={() => setEditingOverview(false)}>Cancel</Button>
-                        </div>
+                    {idea.slidesUrl && (
+                      <div className="w-full h-[28rem] rounded-xl overflow-hidden border border-slate-200">
+                        <iframe src={idea.slidesUrl!} title="Pitch slides" className="w-full h-full" />
                       </div>
-                    ) : (
-                      <>
-                        {idea.cover_image_url && (
-                          <img
-                            src={`http://localhost:5000${idea.cover_image_url}`}
-                            alt={idea.startup_name}
-                            className="w-full rounded-xl border border-slate-200 object-cover"
-                          />
-                        )}
-                        {youtubeEmbedUrl && (
-                          <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black">
-                            <iframe
-                              src={youtubeEmbedUrl}
-                              title="Pitch video"
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                        )}
-                        {idea.slides_url && (
-                          <div className="w-full h-[28rem] rounded-xl overflow-hidden border border-slate-200">
-                            <iframe src={`http://localhost:5000${idea.slides_url}`} title="Pitch slides" className="w-full h-full" />
-                          </div>
-                        )}
-                        {idea.short_description && (
-                          <p className="text-slate-600 leading-relaxed">{idea.short_description}</p>
-                        )}
-                      </>
+                    )}
+                    {idea.shortDescription && (
+                      <p className="text-slate-600 leading-relaxed">{idea.shortDescription}</p>
                     )}
                   </div>
                 )}
@@ -274,40 +291,200 @@ export default function PitchDeck() {
           <aside className="lg:w-80 lg:flex-shrink-0">
             <div className="lg:sticky lg:top-20 space-y-4">
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">Idea Stats</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Idea Stats</h3>
                 <div className="space-y-4">
-                  <VotePill ideaId={idea.id} commentCount={idea.comment_count} />
+                  <VotePill ideaId={idea.id} commentCount={idea.commentCount} />
                 </div>
               </div>
             </div>
+            {related.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Related Startup Ideas</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {related.map(idea => (
+                    <Link to={`/idea/${idea.id}`} key={idea.id}>
+                      <div className="border rounded-lg p-4 hover:shadow-md transition">
+                        <img src={idea.logoUrl ?? "https://placehold.co/100x100"}
+                          className="w-full h-24 object-cover rounded mb-2" />
+                        <p className="text-sm font-semibold text-slate-900">{idea.startupName}</p>
+                        <p className="text-xs text-slate-400">{idea.category}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </aside>
         </div>
-      </div >
+      </div>
 
-      {/* Dialog */}
-      < Dialog open={showAddTab} onOpenChange={setShowAddTab} >
-        <DialogContent className="space-y-4 mt-2 bg bg-white rounded-lg p-4">
-          <DialogHeader>
-            <DialogTitle>Add New Section</DialogTitle>
-          </DialogHeader>
-          <div>
-            <Input
-              placeholder="Section title (e.g. Q&A, Roadmap)"
-              value={newTabTitle}
-              onChange={(e) => setNewTabTitle(e.target.value)}
-            />
-            <Textarea
-              placeholder="Section content..."
-              value={newTabContent}
-              onChange={(e) => setNewTabContent(e.target.value)}
-              rows={5}
-            />
-            <Button onClick={handleAddTab} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
-              Save Section
-            </Button>
-          </div>
+      {/* Edit Pitch Deck Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="bg-white rounded-lg p-6">
+          {editMode === "choose" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Edit Pitch Deck</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-1 gap-3 mt-2">
+                <button
+                  onClick={() => setEditMode("section")}
+                  className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition text-left"
+                >
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">Add Section</p>
+                    <p className="text-xs text-slate-500">Add a custom section (e.g. Q&A, Roadmap)</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setEditMode("materials")}
+                  className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition text-left"
+                >
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Video className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">Pitch Materials</p>
+                    <p className="text-xs text-slate-500">Update YouTube video or slides (PDF)</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setEditMode("delete")}
+                  className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-red-200 hover:bg-red-50 transition text-left"
+                >
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Trash2 className="w-4.5 h-4.5 text-red-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">Delete Content</p>
+                    <p className="text-xs text-slate-500">Remove sections, video, or slides</p>
+                  </div>
+                </button>
+              </div>
+            </>
+          )}
+
+          {editMode === "section" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Add New Section</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 mt-2">
+                <Input
+                  placeholder="Section title (e.g. Q&A, Roadmap)"
+                  value={newTabTitle}
+                  onChange={(e) => setNewTabTitle(e.target.value)}
+                />
+                <Textarea
+                  placeholder="Section content..."
+                  value={newTabContent}
+                  onChange={(e) => setNewTabContent(e.target.value)}
+                  rows={5}
+                />
+                <div className="flex gap-2">
+                  <Button onClick={handleAddTab} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">
+                    Save Section
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditMode("choose")}>
+                    Back
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {editMode === "delete" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete Content</DialogTitle>
+              </DialogHeader>
+              <div className="mt-2 space-y-1">
+                {tabs.length === 0 && !idea.youtubeUrl && !idea.slidesUrl && (
+                  <p className="text-sm text-slate-400 py-4 text-center">Nothing to delete.</p>
+                )}
+                {tabs.map((tab) => (
+                  <div key={tab.id} className="flex items-center justify-between py-2 px-1 border-b border-slate-100">
+                    <span className="text-sm text-slate-700">{tab.title}</span>
+                    <button
+                      onClick={() => handleDeleteTab(tab.id)}
+                      disabled={deletingItem === `tab-${tab.id}`}
+                      className="flex items-center justify-center w-6 h-6 rounded-full border border-red-200 text-red-400 hover:bg-red-50 disabled:opacity-40 transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {idea.youtubeUrl && (
+                  <div className="flex items-center justify-between py-2 px-1 border-b border-slate-100">
+                    <span className="text-sm text-slate-700">YouTube Video</span>
+                    <button
+                      onClick={() => handleClearField("youtube_url")}
+                      disabled={deletingItem === "youtube_url"}
+                      className="flex items-center justify-center w-6 h-6 rounded-full border border-red-200 text-red-400 hover:bg-red-50 disabled:opacity-40 transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+                {idea.slidesUrl && (
+                  <div className="flex items-center justify-between py-2 px-1">
+                    <span className="text-sm text-slate-700">PDF Slides</span>
+                    <button
+                      onClick={() => handleClearField("slides_url")}
+                      disabled={deletingItem === "slides_url"}
+                      className="flex items-center justify-center w-6 h-6 rounded-full border border-red-200 text-red-400 hover:bg-red-50 disabled:opacity-40 transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <Button variant="outline" className="mt-3 w-full" onClick={() => setEditMode("choose")}>
+                Back
+              </Button>
+            </>
+          )}
+
+          {editMode === "materials" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Pitch Materials</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                <div>
+                  <label className="text-sm font-medium text-slate-600">YouTube URL</label>
+                  <Input
+                    value={youtubeUrl}
+                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-600">Upload Slides (PDF)</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => setSlidesFile(e.target.files?.[0] || null)}
+                    className="mt-1 block w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+                  />
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <Button onClick={handleSaveOverview} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                    Save
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditMode("choose")}>
+                    Back
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
-    </div >
+    </div>
   );
 }

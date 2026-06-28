@@ -1,20 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import { Clock, ArrowRight } from "lucide-react";
+import { Clock, ArrowRight, TrendingUp } from "lucide-react";
 import VotePill from "./VotePill";
 import { Idea } from "../../types";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import InterestModal from "./interestModal";
+import { CATEGORY_LABELS } from "../../constants/categories";
 
-
-const CATEGORY_STYLES: Record<string, string> = {
-  Teknologi: "bg-blue-50 text-blue-700 ring-blue-200",
-  Perniagaan: "bg-amber-50 text-amber-700 ring-amber-200",
-  Kesihatan: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  Pendidikan: "bg-violet-50 text-violet-700 ring-violet-200",
-  Kewangan: "bg-rose-50 text-rose-700 ring-rose-200",
+const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
+  Teknologi: { bg: "#EEF2FF", text: "#4F46E5" },
+  Perniagaan: { bg: "#FFFBEB", text: "#D97706" },
+  Kesihatan: { bg: "#ECFDF5", text: "#059669" },
+  Pendidikan: { bg: "#F5F3FF", text: "#7C3AED" },
+  Kewangan: { bg: "#FFF1F2", text: "#E11D48" },
 };
 
+const GRADIENT = "linear-gradient(135deg, #9B59D0, #D4609A, #E8745A)";
 
 function initials(name?: string) {
   if (!name) return "?";
@@ -22,122 +23,143 @@ function initials(name?: string) {
 }
 
 export default function IdeaCard({ idea, user }: { idea: Idea; user: any }) {
-  const [isOpen, setIsOpen] = useState(false);  
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const catClass = CATEGORY_STYLES[idea.category] ?? "bg-slate-100 text-slate-700 ring-slate-200";
+  const catColor = CATEGORY_COLORS[idea.category] ?? { bg: "#F1F5F9", text: "#475569" };
 
   return (
-    <div
-      onClick={() => navigate(`/idea/${idea.id}`)}
-      className="group relative cursor-pointer rounded-2xl p-[1.5px] transition-all duration-300 hover:-translate-y-1"
-    >
-      {/* Gradient border on hover */}
+    <>
       <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-500 transition-opacity duration-300 bg-[length:200%_200%] animate-gradient-pan"
-        style={{ backgroundImage: "var(--gradient-hero)" }}
-      />
-      <div className="relative bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-glow)] transition-shadow duration-300">
+        onClick={() => navigate(`/idea/${idea.id}`)}
+        className="group relative cursor-pointer bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-100/50 hover:border-purple-200/60 flex flex-col"
+      >
         {/* Cover image */}
-        <div className="relative h-44 overflow-hidden bg-slate-100">
-          {idea.cover_image_url ? (
+        <div className="relative h-28 overflow-hidden bg-gray-50 shrink-0">
+          {idea.coverImageUrl ? (
             <img
-              src={`http://localhost:5000${idea.cover_image_url}`}
-              alt={idea.startup_name}
+              src={idea.coverImageUrl!}
+              alt={idea.startupName}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div
               className="w-full h-full flex items-center justify-center"
-              style={{ backgroundImage: "var(--gradient-hero)" }}
+              style={{ background: GRADIENT }}
             >
-              <span className="text-white text-6xl font-black opacity-25">
-                {idea.startup_name?.charAt(0) || "?"}
+              <span className="text-white text-5xl font-black opacity-20 select-none">
+                {idea.startupName?.charAt(0) || "?"}
               </span>
             </div>
           )}
-          <div className="absolute top-3 right-3">
-            <span className={`text-[11px] font-mono px-2.5 py-1 rounded-full ring-1 backdrop-blur bg-white/90 ${catClass}`}>
-              {idea.category}
+
+          {/* Category badge */}
+          <div className="absolute top-3 left-3">
+            <span
+              className="text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: catColor.bg, color: catColor.text }}
+            >
+              {CATEGORY_LABELS[idea.category] ?? idea.category}
             </span>
           </div>
+
+          {/* Trending indicator if votes > 5 */}
+          {idea.upvoteCount > 5 && (
+            <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm text-[#9B59D0] text-xs font-semibold px-2 py-1 rounded-full">
+              <TrendingUp className="w-3 h-3" />
+              Trending
+            </div>
+          )}
         </div>
 
-        <div className="p-5">
+        {/* Card body */}
+        <div className="p-3 flex flex-col flex-1">
+
           {/* Logo + title + founder */}
-          <div className="flex items-center gap-3 mb-3">
-            {idea.logo_url ? (
+          <div className="flex items-start gap-3 mb-3">
+            {idea.logoUrl ? (
               <img
-                src={`http://localhost:5000${idea.logo_url}`}
-                alt={idea.startup_name}
-                className="w-12 h-12 object-cover rounded-xl border border-slate-200 flex-shrink-0"
+                src={idea.logoUrl!}
+                alt={idea.startupName}
+                className="w-11 h-11 object-cover rounded-xl border border-gray-100 shrink-0"
               />
             ) : (
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold"
-                style={{ backgroundImage: "var(--gradient-brand)" }}
+                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white text-sm font-bold"
+                style={{ background: GRADIENT }}
               >
-                {idea.startup_name?.charAt(0) || "?"}
+                {idea.startupName?.charAt(0) || "?"}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="font-extrabold text-lg text-slate-900   truncate group-hover:text-indigo-600 transition-colors">
-                {idea.startup_name}
+              <h3 className="text-sm font-bold text-slate-900 truncate leading-tight group-hover:text-[#9B59D0] transition-colors">
+                {idea.startupName}
               </h3>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white text-[9px] font-bold">
-                  {initials(idea.owner_name)}
-                </span>
-                <p className="text-xs text-slate-500 truncate font-light">
-                  by <span className="font-medium text-slate-700">{idea.owner_name}</span>
+              <div className="flex items-center gap-1.5 mt-1">
+                {idea.ownerProfilePicture ? (
+                  <img
+                    src={idea.ownerProfilePicture}
+                    alt={idea.ownerName}
+                    className="w-4 h-4 rounded-full object-cover shrink-0"
+                  />
+                ) : (
+                  <div
+                    className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0"
+                    style={{ background: GRADIENT }}
+                  >
+                    {initials(idea.ownerName)}
+                  </div>
+                )}
+                <p className="text-xs text-slate-400 truncate">
+                  {idea.ownerName}
                 </p>
               </div>
             </div>
           </div>
 
-          <p className="text-sm text-slate-600 mb-4 line-clamp-2 min-h-[40px] font-light leading-relaxed">
-            {idea.short_description || "Maklumat lanjut akan dikemaskini tidak lama lagi."}
+          {/* Description */}
+          <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed flex-1">
+            {idea.shortDescription || "More details will be updated soon."}
           </p>
 
-          {user?.userType === "company" && ( <>
-            <Button
-              variant="default"
-              size="lg"
-              onClick=
-                {(e) => { e.stopPropagation()
-                setIsOpen(true)}
-                }
-              className="inline-flex items-center justify-center bg-white text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-right"
-              style={{ backgroundImage: "var(--gradient-brand)" }}
+          {/* Industry interest button */}
+          {user?.userType === "company" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(true);
+              }}
+              className="mt-2 w-fit px-4  flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: GRADIENT }}
             >
-              Tunjukkan Minat
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </Button>
-
-            <InterestModal 
-              isOpen={isOpen}
-              onClose={() => setIsOpen(false)} 
-              ideaId={idea.id}
-              startupName={idea.startup_name}
-            />
-            </>
+              Show Interest
+              <ArrowRight className="w-4 h-4" />
+            </button>
           )}
 
-
-          {/* Footer: votes + timestamp */}
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <VotePill ideaId={idea.id} commentCount={idea.comment_count} />
-            <span className="flex items-center gap-1 text-xs text-slate-500">
+          {/* Footer */}
+          <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+            <VotePill ideaId={idea.id} commentCount={idea.commentCount} />
+            <span className="flex items-center gap-1 text-xs text-slate-400">
               <Clock className="w-3 h-3" />
-              {new Date(idea.created_at).toLocaleDateString("en-MY", {
+              {new Date(idea.createdAt).toLocaleDateString("en-MY", {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
               })}
-
             </span>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Interest modal — outside card to avoid click propagation issues */}
+      {user?.userType === "company" && (
+        <InterestModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          ideaId={idea.id}
+          startupName={idea.startupName}
+        />
+      )}
+    </>
   );
 }

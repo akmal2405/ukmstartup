@@ -1,14 +1,16 @@
-import { 
+import {
   getExistingVote,
   getUserVote,
-  getVoteCounts, 
+  getVoteCounts,
   insertVote,
-  deleteVote,     
-  updateVote,      
-  recalculateVoteCounts
+  deleteVote,
+  updateVote,
+  recalculateVoteCounts,
+  getVoteNotificationData,
 } from "../models/voteModel.js";
+import { insertNotification } from "../models/notificationModel.js";
 
-export const voteIdea = async (req, res) => {
+export const createVote = async (req, res) => {
   try {
     const { id: idea_id } = req.params;
     const user_id = req.user.id;
@@ -20,23 +22,41 @@ export const voteIdea = async (req, res) => {
 
     const existing = await getExistingVote(idea_id, user_id);
 
-    if (existing.length === 0) {        // ← fix 1: remove .rows
+    let notifyVoteType = null;
+    if (existing.length === 0) {
       await insertVote(idea_id, user_id, voteType);
-    } else if (existing[0].vote_type === voteType) {
+      notifyVoteType = voteType;
+    } else if (existing[0].voteType === voteType) {
       await deleteVote(idea_id, user_id);
     } else {
       await updateVote(voteType, idea_id, user_id);
+      notifyVoteType = voteType;
     }
 
     await recalculateVoteCounts(idea_id);
     const counts = await getVoteCounts(idea_id);
-    const { upvote_count, downvote_count } = counts;
+    const { upvoteCount, downvoteCount } = counts;
 
     res.json({
-      upvote_count,
-      downvote_count,
-      net_score: upvote_count - downvote_count,
+      upvoteCount,
+      downvoteCount,
+      netScore: upvoteCount - downvoteCount,
     });
+
+    if (notifyVoteType) {
+      const data = await getVoteNotificationData(idea_id, user_id);
+      if (data) {
+        const type = notifyVoteType === "up" ? "upvote" : "downvote";
+        const verb = notifyVoteType === "up" ? "upvoted" : "downvoted";
+        insertNotification(
+          data.ideaOwnerId,
+          user_id,
+          type,
+          idea_id,
+          `${data.actorName} ${verb} your idea "${data.ideaName}"`,
+        );
+      }
+    }
 
   } catch (error) {
     console.error("voteIdea error:", error.message);
@@ -49,15 +69,15 @@ export const getVotes = async (req, res) => {
     const { id: idea_id } = req.params;
     const user_id = req.user.id;
 
-    const counts = await getVoteCounts(idea_id);        // ← fix 3: correct name
-    const { upvote_count, downvote_count } = counts;    // ← fix 4: destructure
+    const counts = await getVoteCounts(idea_id);
+    const { upvoteCount, downvoteCount } = counts;
     const userVote = await getUserVote(idea_id, user_id);
 
     res.json({
-      upvote_count,
-      downvote_count,
-      net_score: upvote_count - downvote_count,
-      user_vote: userVote?.vote_type || null,
+      upvoteCount,
+      downvoteCount,
+      netScore: upvoteCount - downvoteCount,
+      userVote: userVote?.voteType || null,
     });
 
   } catch (error) {

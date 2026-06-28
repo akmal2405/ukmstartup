@@ -31,7 +31,7 @@ export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, i
           <Sparkles className="w-4 h-4 text-indigo-600" /> LIVE REVIEW
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="relative aspect-[16/9] bg-gradient-to-br from-indigo-100 to-violet-100">
+          <div className="relative h-28 bg-gradient-to-br from-indigo-100 to-violet-100">
             {coverPreview && (
               <img src={coverPreview} alt="" className="absolute inset-0 w-full h-full object-cover" />
             )}
@@ -40,7 +40,7 @@ export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, i
                 {formData.category}
               </span>
             )}
-            <div className="absolute -bottom-6 left-4 w-14 h-14 rounded-full ring-4 ring-white bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold overflow-hidden">
+            <div className="absolute -bottom-6 left-4 w-14 h-14 rounded-full ring-4 ring-white bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] flex items-center justify-center text-white font-bold overflow-hidden">
               {logoPreview ? (
                 <img src={logoPreview} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -50,11 +50,11 @@ export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, i
           </div>
           <div className="p-4 pt-8">
             <h3 className="font-semibold text-slate-900 truncate">
-              {formData.startupName || "Nama Startup Anda"}
+              {formData.startupName || "Your Startup Name"}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">oleh Anda</p>
+            <p className="text-xs text-slate-500 mt-0.5">by You</p>
             <p className="text-sm text-slate-600 mt-3 line-clamp-3 min-h-[3.75rem]">
-              {formData.shortDescription || "Penerangan idea anda akan dipaparkan di sini..."}
+              {formData.shortDescription || "Your idea description will appear here..."}
             </p>
             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
               <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1">
@@ -71,18 +71,18 @@ export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, i
             <div className="lg:col-span-3 bottom-4 z-10">
               <div className="bg-white border border-slate-200 shadow-lg rounded-xl p-3 flex items-center justify-between">
                 <p className="text-sm text-slate-500 hidden sm:block px-2">
-                  Pastikan semua maklumat tepat sebelum hantar.
+                  Make sure all details are correct before submitting.
                 </p>
                 <div className="flex items-center gap-2 ml-auto">
                   <Button type="button" variant="ghost" onClick={() => navigate(-1)}>
-                    Batal
+                    Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-full px-6"
+                    className="bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] text-white rounded-full px-6"
                   >
-                    {isLoading ? "Menghantar..." : "Hantar Idea"}
+                    {isLoading ? "Submitting..." : "Submit Idea"}
                   </Button>
                 </div>
               </div>

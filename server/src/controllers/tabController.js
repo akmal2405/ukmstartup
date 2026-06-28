@@ -1,8 +1,8 @@
 import {
   getTabsByIdeaId,
   insertTab,
-  deleteTab,
-  updateTab,
+  deleteTab as deleteTabById,
+  updateTab as updateTabById,
 } from "../models/tabModel.js";
 
 export const getTabs = async (req, res) => {
@@ -11,7 +11,7 @@ export const getTabs = async (req, res) => {
     res.json(tabs);
   } catch (error) {
     console.error("GET TABS ERROR:", error);
-    res.status(500).json({ error: "Failed to fetch tabs" });
+    res.status(500).json({ message: "Failed to fetch tabs" });
   }
 };
 
@@ -22,27 +22,30 @@ export const createTab = async (req, res) => {
     res.status(201).json(newTab);
   } catch (error) {
     console.error("CREATE TAB ERROR:", error);
-    res.status(500).json({ error: "Failed to create tab" });
+    res.status(500).json({ message: "Failed to create tab" });
   }
 };
 
-export const removeTab = async (req, res) => {
+export const deleteTab = async (req, res) => {
   try {
-    await deleteTab(req.params.tabId);
+    const result = await deleteTabById(req.params.tabId, req.user.id);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Tab not found or not authorized" });
+    }
     res.json({ message: "Tab deleted successfully" });
   } catch (error) {
     console.error("DELETE TAB ERROR:", error);
-    res.status(500).json({ error: "Failed to delete tab" });
+    res.status(500).json({ message: "Failed to delete tab" });
   }
 };
 
-export const editTab = async (req, res) => {
+export const updateTab = async (req, res) => {
   try {
     const { title, content } = req.body;
-    const updatedTab = await updateTab(req.params.tabId, title, content);
+    const updatedTab = await updateTabById(req.params.tabId, title, content);
     res.json(updatedTab);
   } catch (error) {
     console.error("UPDATE TAB ERROR:", error);
-    res.status(500).json({ error: "Failed to update tab" });
+    res.status(500).json({ message: "Failed to update tab" });
   }
 };
