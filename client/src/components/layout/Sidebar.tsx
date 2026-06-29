@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home, Building2, Plus, Lightbulb, User, Settings,
-  Cpu, Briefcase, Heart, BookOpen, DollarSign,
+  Cpu, Briefcase, Heart, BookOpen, DollarSign, Star,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
@@ -9,11 +9,11 @@ import { useAuth } from "@/context/AuthContext";
 import { CATEGORIES, CATEGORY_LABELS } from "@/constants/categories";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  Teknologi: Cpu,
-  Perniagaan: Briefcase,
-  Kesihatan: Heart,
-  Pendidikan: BookOpen,
-  Kewangan: DollarSign,
+  Technology: Cpu,
+  Business:   Briefcase,
+  Health:     Heart,
+  Education:  BookOpen,
+  Finance:    DollarSign,
 };
 
 export default function Sidebar() {
@@ -74,6 +74,9 @@ export default function Sidebar() {
 
         {user?.userType === "community" && (
           <SidebarLink to="/my-ideas" icon={Lightbulb} label="My Ideas" isOpen={isOpen} />
+        )}
+        {user?.userType === "company" && (
+          <SidebarLink to="/my-interests" icon={Star} label="My Interests" isOpen={isOpen} />
         )}
         <SidebarLink to="/profile" icon={User} label="Profile" isOpen={isOpen} />
 

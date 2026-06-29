@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Rocket, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import IdeaCard from "../components/ideas/IdeaCard";
 import { useAuth } from "../context/AuthContext";
 import { useIdeas } from "../hooks/useIdeas";
@@ -31,7 +32,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-white">
       <main className="max-w-7xl mr-auto px-4 sm:px-6 py-6">
 
         {/* ── GREETING ── */}
@@ -76,7 +77,11 @@ export default function Dashboard() {
                 ) : (
                   <div className="space-y-3">
                     {topIdeas.map((idea, index) => (
-                      <div key={idea.id} className="flex items-center gap-3">
+                      <Link
+                        to={`/idea/${idea.id}`}
+                        key={idea.id}
+                        className="flex items-center gap-3 -mx-2 px-2 py-1 rounded-lg hover:bg-slate-50 transition"
+                      >
                         <span className="text-xs font-bold text-gray-400 w-4">{index + 1}</span>
                         {idea.logoUrl ? (
                           <img
@@ -95,7 +100,7 @@ export default function Dashboard() {
                           <p className="text-xs font-medium text-gray-800 truncate">{idea.startupName}</p>
                           <p className="text-xs text-gray-400">▲ {idea.upvoteCount} votes</p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}

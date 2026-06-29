@@ -47,7 +47,7 @@ export default function CompaniesDirectory() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mr-auto px-4 sm:px-6 py-6">
       <h1 className="scroll-m-20  text-4xl font-extrabold tracking-tight text-balance">
         Companies
       </h1>

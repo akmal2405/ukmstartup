@@ -40,7 +40,7 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mr-auto px-4 sm:px-6 py-6">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance mb-3  ">{CATEGORY_LABELS[category] ?? category}</h1>
 
         {loading ? (

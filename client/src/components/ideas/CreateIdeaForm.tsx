@@ -17,7 +17,7 @@ import {
 import IdeaPreviewCard from "./ideaPreviewCard";
 
 import { CATEGORIES, CATEGORY_LABELS } from "../../constants/categories";
-const ALL_CATEGORIES = [...CATEGORIES, "Sosial"];
+const ALL_CATEGORIES = [...CATEGORIES, "Social"];
 
 interface CreateIdeaFormProps {
   onSuccess?: () => void;

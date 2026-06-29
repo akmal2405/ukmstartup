@@ -1,16 +1,16 @@
 export const CATEGORIES = [
-  "Teknologi",
-  "Perniagaan",
-  "Kesihatan",
-  "Pendidikan",
-  "Kewangan",
+  "Technology",
+  "Business",
+  "Health",
+  "Education",
+  "Finance",
 ];
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  Teknologi: "Technology",
-  Perniagaan: "Business",
-  Kesihatan: "Health",
-  Pendidikan: "Education",
-  Kewangan: "Finance",
-  Sosial: "Social",
+  Technology: "Technology",
+  Business:   "Business",
+  Health:     "Health",
+  Education:  "Education",
+  Finance:    "Finance",
+  Social:     "Social",
 };

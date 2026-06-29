@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Pencil, FileText, Video, Trash2, Minus } from "lucide-react";
+import { Pencil, FileText, Video, Trash2, Minus, ArrowBigUp, ArrowBigDown, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { CATEGORY_LABELS } from "../constants/categories";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -349,15 +350,33 @@ export default function PitchDeck() {
 
             {related.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Related Startup Ideas</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Similar Startup Ideas</h3>
+                <div className="flex flex-col divide-y divide-slate-100">
                   {related.map(idea => (
-                    <Link to={`/idea/${idea.id}`} key={idea.id}>
-                      <div className="border rounded-lg p-4 hover:shadow-md transition">
-                        <img src={idea.logoUrl ?? "https://placehold.co/100x100"}
-                          className="w-full h-24 object-cover rounded mb-2" />
-                        <p className="text-sm font-semibold text-slate-900">{idea.startupName}</p>
-                        <p className="text-xs text-slate-400">{idea.category}</p>
+                    <Link to={`/idea/${idea.id}`} key={idea.id} className="flex gap-3 py-4 hover:bg-slate-50 transition rounded-lg px-2 -mx-2">
+                      <img
+                        src={idea.logoUrl ?? "https://placehold.co/100x100"}
+                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{idea.startupName}</p>
+                        <p className="text-sm text-slate-500 line-clamp-2 mt-0.5">{idea.shortDescription}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs px-2.5 py-1 rounded-full border border-slate-200 text-slate-600">
+                            {CATEGORY_LABELS[idea.category] ?? idea.category}
+                          </span>
+                          <div className="flex items-center gap-2 text-xs text-slate-400">
+                            <span className="flex items-center gap-0.5">
+                              <ArrowBigUp className="w-3.5 h-3.5" />{idea.upvoteCount}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <ArrowBigDown className="w-3.5 h-3.5" />{idea.downvoteCount}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <MessageCircle className="w-3 h-3" />{idea.commentCount}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </Link>
                   ))}

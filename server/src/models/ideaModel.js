@@ -229,14 +229,19 @@ export const updateIdeaGallery = async (ideaId, urls, userId) => {
 export const getRelatedIdeas = async (category, ideaId) => {
   const result = await pool.query(
     `SELECT
-     ideas.id, 
-     ideas.startup_name AS "startupName", 
-     ideas.logo_url AS "logoUrl",
+      ideas.id,
+      ideas.startup_name AS "startupName",
+      ideas.logo_url AS "logoUrl",
       ideas.category,
-      ideas.upvote_count AS "upvoteCount"
+      ideas.short_description AS "shortDescription",
+      ideas.upvote_count AS "upvoteCount",
+      ideas.downvote_count AS "downvoteCount",
+      COUNT(comments.id)::int AS "commentCount"
      FROM ideas
-     WHERE category = $1
-       AND id != $2
+     LEFT JOIN comments ON comments.idea_id = ideas.id
+     WHERE ideas.category = $1
+       AND ideas.id != $2
+     GROUP BY ideas.id
      LIMIT 3`,
     [category, ideaId],
   );

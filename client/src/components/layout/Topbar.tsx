@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus, User, LogOutIcon, LightbulbIcon, CogIcon, Building, ChevronDown, Menu } from "lucide-react";
+import { Search, Plus, User, LogOutIcon, LightbulbIcon, CogIcon, Building, ChevronDown, Menu, Star } from "lucide-react";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -138,6 +138,14 @@ export default function Topbar() {
               <a href="/my-ideas" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
                 <LightbulbIcon className="w-5 h-5 text-slate-400" />
                 My ideas
+              </a>
+            </DropdownMenuItem>
+          )}
+          {user?.userType === "company" && (
+            <DropdownMenuItem>
+              <a href="/my-interests" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
+                <Star className="w-5 h-5 text-slate-400" />
+                My Interests
               </a>
             </DropdownMenuItem>
           )}
