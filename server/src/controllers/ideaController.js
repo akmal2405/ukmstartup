@@ -5,6 +5,7 @@ import {
   getIdeasByUserId,
   deleteIdea as deleteIdeaById,
   updateIdeaPitchDeck,
+  updateIdeaGallery,
   fetchTopVotedIdeas,
   getRelatedIdeas,
   clearIdeaPitchField,
@@ -89,19 +90,25 @@ export const getMyIdeas = async (req, res) => {
 
 export const updatePitchDeck = async (req, res) => {
   try {
-    console.log("controller reach");
-    console.log(req.file);
     const { youtube_url } = req.body;
-    const slidesUrl = req.file ? req.file.secure_url : null;
-    console.log("slidesUrl:", slidesUrl);
     const ideaId = req.params.id;
 
-    const updatedIdea = await updateIdeaPitchDeck(
-      ideaId,
-      youtube_url,
-      slidesUrl,
-    );
-    res.json(updatedIdea);
+    const existing = await getIdeaById(ideaId);
+    if (!existing || existing.userId !== req.user.id) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    const slidesUrl = req.files?.slides?.[0]?.secure_url ?? null;
+    const galleryUrls = (req.files?.galleryImages ?? []).map((f) => f.secure_url);
+
+    await updateIdeaPitchDeck(ideaId, youtube_url, slidesUrl);
+
+    if (galleryUrls.length > 0) {
+      await updateIdeaGallery(ideaId, galleryUrls, req.user.id);
+    }
+
+    const final = await getIdeaById(ideaId);
+    res.json(final);
   } catch (error) {
     console.error("UPDATE PITCH DECK ERROR:", error);
     res.status(500).json({ error: "Failed to update pitch deck" });
@@ -121,7 +128,7 @@ export const getTopVotedIdeas = async (req, res) => {
 export const clearPitchField = async (req, res) => {
   try {
     const { field } = req.body;
-    const ALLOWED = ["youtube_url", "slides_url"];
+    const ALLOWED = ["youtube_url", "slides_url", "gallery_image_urls"];
     if (!ALLOWED.includes(field)) {
       return res.status(400).json({ message: "Invalid field" });
     }

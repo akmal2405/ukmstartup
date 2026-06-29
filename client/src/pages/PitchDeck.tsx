@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Pencil, FileText, Video, Trash2, Minus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function PitchDeck() {
   const { user } = useAuth();
@@ -28,6 +30,7 @@ export default function PitchDeck() {
   const [newTabContent, setNewTabContent] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [slidesFile, setSlidesFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [related, setRelated] = useState([]);
 
   useEffect(() => {
@@ -109,7 +112,7 @@ export default function PitchDeck() {
     }
   };
 
-  const handleClearField = async (field: "youtube_url" | "slides_url") => {
+  const handleClearField = async (field: "youtube_url" | "slides_url" | "gallery_image_urls") => {
     setDeletingItem(field);
     try {
       const token = localStorage.getItem("token");
@@ -125,10 +128,11 @@ export default function PitchDeck() {
         setIdea((prev) =>
           prev
             ? {
-                ...prev,
-                youtubeUrl: field === "youtube_url" ? undefined : prev.youtubeUrl,
-                slidesUrl: field === "slides_url" ? undefined : prev.slidesUrl,
-              }
+              ...prev,
+              youtubeUrl: field === "youtube_url" ? undefined : prev.youtubeUrl,
+              slidesUrl: field === "slides_url" ? undefined : prev.slidesUrl,
+              galleryImageUrls: field === "gallery_image_urls" ? [] : prev.galleryImageUrls,
+            }
             : prev,
         );
         if (field === "youtube_url") setYoutubeUrl("");
@@ -144,6 +148,7 @@ export default function PitchDeck() {
       const formData = new FormData();
       formData.append("youtube_url", youtubeUrl);
       if (slidesFile) formData.append("slides", slidesFile);
+      galleryFiles.forEach((f) => formData.append("galleryImages", f));
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${id}/pitch`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
@@ -267,6 +272,25 @@ export default function PitchDeck() {
                         <iframe src={idea.slidesUrl!} title="Pitch slides" className="w-full h-full" />
                       </div>
                     )}
+                    {idea.galleryImageUrls && idea.galleryImageUrls.length > 0 && (
+                      <Carousel className="w-full">
+                        <CarouselContent>
+                          {idea.galleryImageUrls.map((url, index) => (
+                            <CarouselItem key={index}>
+                              <div className="p-1">
+                                <Card>
+                                  <CardContent className="flex aspect-video items-center justify-center p-0 overflow-hidden">
+                                    <img src={url} alt={`${idea.startupName} image ${index + 1}`} className="w-full h-full object-cover" />
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </Carousel>
+                    )}
                     {idea.shortDescription && (
                       <p className="text-slate-600 leading-relaxed">{idea.shortDescription}</p>
                     )}
@@ -296,7 +320,33 @@ export default function PitchDeck() {
                   <VotePill ideaId={idea.id} commentCount={idea.commentCount} />
                 </div>
               </div>
+
+              <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">About the Founder</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0">
+                    {idea.ownerProfilePicture ? (
+                      <img src={idea.ownerProfilePicture} className="w-full h-full object-cover" />
+                    ) : (
+                      idea.ownerName?.charAt(0)
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">{idea.ownerName}</p>
+                    {idea.ownerCommunityRole && (
+                      <p className="text-xs text-slate-400 capitalize">{idea.ownerCommunityRole}</p>
+                    )}
+                  </div>
+                </div>
+                {idea.ownerFaculty && (
+                  <p className="text-sm text-slate-600">{idea.ownerFaculty}</p>
+                )}
+                {idea.ownerYearOfStudy && (
+                  <p className="text-sm text-slate-400 mt-0.5">Year {idea.ownerYearOfStudy}</p>
+                )}
+              </div>
             </div>
+
             {related.length > 0 && (
               <div className="mt-8">
                 <h3 className="text-lg font-bold text-slate-900 mb-4">Related Startup Ideas</h3>
@@ -402,7 +452,7 @@ export default function PitchDeck() {
                 <DialogTitle>Delete Content</DialogTitle>
               </DialogHeader>
               <div className="mt-2 space-y-1">
-                {tabs.length === 0 && !idea.youtubeUrl && !idea.slidesUrl && (
+                {tabs.length === 0 && !idea.youtubeUrl && !idea.slidesUrl && !idea.galleryImageUrls?.length && (
                   <p className="text-sm text-slate-400 py-4 text-center">Nothing to delete.</p>
                 )}
                 {tabs.map((tab) => (
@@ -430,11 +480,23 @@ export default function PitchDeck() {
                   </div>
                 )}
                 {idea.slidesUrl && (
-                  <div className="flex items-center justify-between py-2 px-1">
+                  <div className="flex items-center justify-between py-2 px-1 border-b border-slate-100">
                     <span className="text-sm text-slate-700">PDF Slides</span>
                     <button
                       onClick={() => handleClearField("slides_url")}
                       disabled={deletingItem === "slides_url"}
+                      className="flex items-center justify-center w-6 h-6 rounded-full border border-red-200 text-red-400 hover:bg-red-50 disabled:opacity-40 transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+                {idea.galleryImageUrls && idea.galleryImageUrls.length > 0 && (
+                  <div className="flex items-center justify-between py-2 px-1">
+                    <span className="text-sm text-slate-700">Gallery Images ({idea.galleryImageUrls.length})</span>
+                    <button
+                      onClick={() => handleClearField("gallery_image_urls")}
+                      disabled={deletingItem === "gallery_image_urls"}
                       className="flex items-center justify-center w-6 h-6 rounded-full border border-red-200 text-red-400 hover:bg-red-50 disabled:opacity-40 transition"
                     >
                       <Minus className="w-3.5 h-3.5" />
@@ -471,6 +533,19 @@ export default function PitchDeck() {
                     onChange={(e) => setSlidesFile(e.target.files?.[0] || null)}
                     className="mt-1 block w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
                   />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-600">Gallery Images (up to 5)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => setGalleryFiles(Array.from(e.target.files || []).slice(0, 5))}
+                    className="mt-1 block w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+                  />
+                  {galleryFiles.length > 0 && (
+                    <p className="mt-1 text-xs text-slate-400">{galleryFiles.length} image{galleryFiles.length > 1 ? "s" : ""} selected</p>
+                  )}
                 </div>
                 <div className="flex gap-2 pt-1">
                   <Button onClick={handleSaveOverview} className="bg-indigo-600 hover:bg-indigo-700 text-white">

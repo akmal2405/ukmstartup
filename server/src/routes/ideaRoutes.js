@@ -29,14 +29,25 @@ const imageStorage = new CloudinaryStorage({
 
 const upload = multer({ storage: imageStorage });
 
-const slidesStorage = new CloudinaryStorage({
+const pitchStorage = new CloudinaryStorage({
   cloudinary: { v2: cloudinary },
-  params: {
-    folder: "ideas/slides",
+  params: (req, file, cb) => {
+    if (file.fieldname === "slides") {
+      const base = file.originalname.replace(/\.[^/.]+$/, "");
+      return cb(null, {
+        folder: "ideas/slides",
+        resource_type: "raw",
+        public_id: `${Date.now()}-${base}.pdf`,
+      });
+    }
+    cb(null, {
+      folder: "ideas/gallery",
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    });
   },
 });
 
-const uploadSlides = multer({ storage: slidesStorage });
+const uploadPitch = multer({ storage: pitchStorage });
 
 /* ---------- ROUTES ---------- */
 
@@ -49,15 +60,7 @@ router.delete("/:id", deleteIdea);
 router.put(
   "/:id/pitch",
   protect,
-  (req, res, next) => {
-    console.log("reacjhed");
-    next();
-  },
-  uploadSlides.single("slides"),
-  (req, res, next) => {
-    console.log("fniished");
-    next();
-  },
+  uploadPitch.fields([{ name: "slides", maxCount: 1 }, { name: "galleryImages", maxCount: 5 }]),
   updatePitchDeck,
 );
 router.patch("/:id/pitch/clear", protect, clearPitchField);
@@ -76,7 +79,7 @@ router.post(
 router.post(
   "/:id/pitch-deck",
   protect,
-  uploadSlides.single("slides"),
+  uploadPitch.fields([{ name: "slides", maxCount: 1 }, { name: "galleryImages", maxCount: 5 }]),
   updatePitchDeck,
 );
 

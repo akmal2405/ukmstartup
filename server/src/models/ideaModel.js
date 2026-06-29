@@ -77,13 +77,18 @@ export const getIdeaById = async (id) => {
       ideas.status,
       ideas.youtube_url AS "youtubeUrl",
       ideas.slides_url AS "slidesUrl",
+      ideas.gallery_image_urls AS "galleryImageUrls",
       users.full_name AS "ownerName",
+      users.profile_pictures_url AS "ownerProfilePicture",
+      users.community_role AS "ownerCommunityRole",
+      users.faculty AS "ownerFaculty",
+      users.year_of_study AS "ownerYearOfStudy",
       COUNT(comments.id) AS "commentCount"
       FROM ideas
       JOIN users ON ideas.user_id = users.id
       LEFT JOIN comments ON comments.idea_id = ideas.id
       WHERE ideas.id = $1
-      GROUP BY ideas.id, users.full_name`,
+      GROUP BY ideas.id, users.full_name, users.profile_pictures_url, users.community_role, users.faculty, users.year_of_study`,
       [id],
     );
     return result.rows[0];
@@ -203,12 +208,21 @@ export const fetchTopVotedIdeas = async () => {
 
 export const clearIdeaPitchField = async (ideaId, field, userId) => {
   const queries = {
-    youtube_url: `UPDATE ideas SET youtube_url = NULL WHERE id = $1 AND user_id = $2`,
-    slides_url:  `UPDATE ideas SET slides_url  = NULL WHERE id = $1 AND user_id = $2`,
+    youtube_url:        `UPDATE ideas SET youtube_url = NULL WHERE id = $1 AND user_id = $2`,
+    slides_url:         `UPDATE ideas SET slides_url  = NULL WHERE id = $1 AND user_id = $2`,
+    gallery_image_urls: `UPDATE ideas SET gallery_image_urls = NULL WHERE id = $1 AND user_id = $2`,
   };
   const sql = queries[field];
   if (!sql) throw new Error("Invalid field");
   const result = await pool.query(sql, [ideaId, userId]);
+  return result;
+};
+
+export const updateIdeaGallery = async (ideaId, urls, userId) => {
+  const result = await pool.query(
+    `UPDATE ideas SET gallery_image_urls = $1 WHERE id = $2 AND user_id = $3`,
+    [urls, ideaId, userId],
+  );
   return result;
 };
 

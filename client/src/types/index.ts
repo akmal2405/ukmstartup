@@ -30,9 +30,13 @@ export interface Idea {
   upvoteCount: number;
   youtubeUrl?: string;
   slidesUrl?: string;
+  galleryImageUrls?: string[];
   hasPitchDeck?: boolean;
   interestCount?: number;
   phoneNumber?: string;
+  ownerCommunityRole: string;
+  ownerFaculty: string;
+  ownerYearOfStudy: number;
 }
 
 export interface Comment {
