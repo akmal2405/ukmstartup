@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, FileText, Video, Trash2, Minus, ArrowBigUp, ArrowBigDown, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CATEGORY_LABELS } from "../constants/categories";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 
 export default function PitchDeck() {
   const { user } = useAuth();
@@ -32,7 +31,19 @@ export default function PitchDeck() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [slidesFile, setSlidesFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [isSavingSection, setIsSavingSection] = useState(false);
+  const [isSavingMaterials, setIsSavingMaterials] = useState(false);
   const [related, setRelated] = useState([]);
+  const [galleryApi, setGalleryApi] = useState<CarouselApi>();
+  const [galleryCurrent, setGalleryCurrent] = useState(0);
+
+  useEffect(() => {
+    if (!galleryApi) return;
+    setGalleryCurrent(galleryApi.selectedScrollSnap());
+    galleryApi.on("select", () => {
+      setGalleryCurrent(galleryApi.selectedScrollSnap());
+    });
+  }, [galleryApi]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${id}/related`)
@@ -75,7 +86,8 @@ export default function PitchDeck() {
   };
 
   const handleAddTab = async () => {
-    if (!newTabTitle.trim()) return;
+    if (!newTabTitle.trim() || isSavingSection) return;
+    setIsSavingSection(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${id}/tabs`, {
@@ -93,6 +105,8 @@ export default function PitchDeck() {
       closeDialog();
     } catch (err) {
       console.error("Error creating tab:", err);
+    } finally {
+      setIsSavingSection(false);
     }
   };
 
@@ -144,6 +158,8 @@ export default function PitchDeck() {
   };
 
   const handleSaveOverview = async () => {
+    if (isSavingMaterials) return;
+    setIsSavingMaterials(true);
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
@@ -160,6 +176,8 @@ export default function PitchDeck() {
       closeDialog();
     } catch (err) {
       console.error("Error saving overview:", err);
+    } finally {
+      setIsSavingMaterials(false);
     }
   };
 
@@ -274,23 +292,40 @@ export default function PitchDeck() {
                       </div>
                     )}
                     {idea.galleryImageUrls && idea.galleryImageUrls.length > 0 && (
-                      <Carousel className="w-full">
-                        <CarouselContent>
-                          {idea.galleryImageUrls.map((url, index) => (
-                            <CarouselItem key={index}>
-                              <div className="p-1">
-                                <Card>
-                                  <CardContent className="flex aspect-video items-center justify-center p-0 overflow-hidden">
-                                    <img src={url} alt={`${idea.startupName} image ${index + 1}`} className="w-full h-full object-cover" />
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
+                      <div className="relative w-full rounded-xl overflow-hidden">
+                        <Carousel className="w-full" setApi={setGalleryApi}>
+                          <CarouselContent>
+                            {idea.galleryImageUrls.map((url, index) => (
+                              <CarouselItem key={index}>
+                                <div className="aspect-video w-full overflow-hidden rounded-xl">
+                                  <img
+                                    src={url}
+                                    alt={`${idea.startupName} image ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                          <CarouselPrevious className="left-3 h-8 w-8 border-0 bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm" />
+                          <CarouselNext className="right-3 h-8 w-8 border-0 bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm" />
+                        </Carousel>
+                        {idea.galleryImageUrls.length > 1 && (
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                            {idea.galleryImageUrls.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => galleryApi?.scrollTo(index)}
+                                className={`h-1.5 rounded-full transition-all ${
+                                  index === galleryCurrent
+                                    ? "w-4 bg-white"
+                                    : "w-1.5 bg-white/50 hover:bg-white/70"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     )}
                     {idea.shortDescription && (
                       <p className="text-slate-600 leading-relaxed">{idea.shortDescription}</p>
@@ -454,10 +489,14 @@ export default function PitchDeck() {
                   rows={5}
                 />
                 <div className="flex gap-2">
-                  <Button onClick={handleAddTab} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white">
-                    Save Section
+                  <Button
+                    onClick={handleAddTab}
+                    disabled={isSavingSection}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-60"
+                  >
+                    {isSavingSection ? "Saving..." : "Save Section"}
                   </Button>
-                  <Button variant="outline" onClick={() => setEditMode("choose")}>
+                  <Button variant="outline" onClick={() => setEditMode("choose")} disabled={isSavingSection}>
                     Back
                   </Button>
                 </div>
@@ -567,10 +606,14 @@ export default function PitchDeck() {
                   )}
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <Button onClick={handleSaveOverview} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                    Save
+                  <Button
+                    onClick={handleSaveOverview}
+                    disabled={isSavingMaterials}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-60"
+                  >
+                    {isSavingMaterials ? "Uploading..." : "Save"}
                   </Button>
-                  <Button variant="outline" onClick={() => setEditMode("choose")}>
+                  <Button variant="outline" onClick={() => setEditMode("choose")} disabled={isSavingMaterials}>
                     Back
                   </Button>
                 </div>
