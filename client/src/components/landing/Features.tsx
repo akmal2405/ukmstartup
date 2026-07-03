@@ -17,7 +17,7 @@ const features: Feature[] = [
     icon: Sparkles,
     title: "Get AI Feedback",
     description:
-      "Instant, structured analysis of your pitch — market fit, risks, and next steps — powered by AI trained on real venture playbooks.",
+      "Instant, structured analysis of your pitch market fit, risks, and next steps powered by AI trained on real venture playbooks.",
   },
   {
     icon: Building2,

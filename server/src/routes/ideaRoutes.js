@@ -8,6 +8,7 @@ import {
   getIdea,
   getMyIdeas,
   deleteIdea,
+  updateIdea,
   updatePitchDeck,
   getTopVotedIdeas,
   fetchRelatedIdeas,
@@ -56,7 +57,16 @@ router.get("/top-voted", getTopVotedIdeas);
 router.get("/search", search);
 router.get("/:id/related", fetchRelatedIdeas);
 router.get("/:id", getIdea);
-router.delete("/:id", deleteIdea);
+router.delete("/:id", protect, deleteIdea);
+router.put(
+  "/:id",
+  protect,
+  upload.fields([
+    { name: "logo", maxCount: 1 },
+    { name: "cover", maxCount: 1 },
+  ]),
+  updateIdea,
+);
 router.put(
   "/:id/pitch",
   protect,

@@ -37,6 +37,12 @@ export interface Idea {
   ownerCommunityRole: string;
   ownerFaculty: string;
   ownerYearOfStudy: number;
+  aiScore?: number | null;
+  aiSummary?: string | null;
+  aiStrengths?: string[] | null;
+  aiImprovements?: string[] | null;
+  aiVerdict?: string | null;
+  aiEvaluatedAt?: string | null;
 }
 
 export interface Comment {

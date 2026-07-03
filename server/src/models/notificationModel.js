@@ -1,6 +1,12 @@
 import pool from "../config/db.js";
 
-export const insertNotification = async (recipient_id, actor_id, type, idea_id, message) => {
+export const insertNotification = async (
+  recipient_id,
+  actor_id,
+  type,
+  idea_id,
+  message,
+) => {
   try {
     if (recipient_id === actor_id) return null;
 

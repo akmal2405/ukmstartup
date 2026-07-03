@@ -23,7 +23,7 @@ export function CtaSection() {
             className="h-12 bg-white px-8 text-base font-semibold transition-opacity hover:bg-white hover:opacity-90"
             asChild
           >
-            <Link to="/register">
+            <Link to="/signup">
               <span
                 className="bg-clip-text text-transparent"
                 style={{ backgroundImage: "linear-gradient(to right, #9B59D0, #D4609A, #E8745A)" }}

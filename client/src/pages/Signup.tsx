@@ -9,6 +9,8 @@ interface FormData {
   fullName: string;
   communityRole: string;
   matricNumber: string;
+  faculty: string;
+  yearOfStudy: string;
   companyName: string;
   industry: string;
   contactPerson: string;
@@ -29,6 +31,8 @@ export default function Register() {
     fullName: "",
     communityRole: "student",
     matricNumber: "",
+    faculty: "",
+    yearOfStudy: "",
     companyName: "",
     industry: "",
     contactPerson: "",
@@ -37,7 +41,7 @@ export default function Register() {
     companyPassword: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -75,6 +79,8 @@ export default function Register() {
           userType: "community",
           fullName: formData.fullName,
           communityRole: formData.communityRole,
+          faculty: formData.faculty || undefined,
+          yearOfStudy: formData.yearOfStudy ? Number(formData.yearOfStudy) : undefined,
         }),
       });
 
@@ -210,18 +216,47 @@ export default function Register() {
             </div>
 
             {formData.communityRole === "student" && (
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Matric Number *</label>
-                <input
-                  type="text"
-                  name="matricNumber"
-                  value={formData.matricNumber}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="A123456"
-                />
-              </div>
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Matric Number *</label>
+                  <input
+                    type="text"
+                    name="matricNumber"
+                    value={formData.matricNumber}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="A123456"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Faculty *</label>
+                  <input
+                    type="text"
+                    name="faculty"
+                    value={formData.faculty}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="e.g. Faculty of Engineering and Built Environment"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Year of Study *</label>
+                  <select
+                    name="yearOfStudy"
+                    value={formData.yearOfStudy}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Select year</option>
+                    {[1, 2, 3, 4, 5, 6].map((y) => (
+                      <option key={y} value={y}>Year {y}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
             )}
 
             <div className="mb-4">

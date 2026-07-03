@@ -1,14 +1,13 @@
 const stats = [
-  { value: "2,400+", label: "Student founders" },
-  { value: "1,800+", label: "Ideas shared" },
-  { value: "120+", label: "Industry mentors" },
-  { value: "RM 3.2M", label: "Raised by alumni" },
+  { value: "2,400+", label: "Targeted Student founders" },
+  { value: "1,800+", label: "Targeted Ideas shared" },
+  { value: "120+", label: "Targeted Industry mentors" },
 ]
 
 export function StatsBar() {
   return (
-    <section id="stats" className="border-y  bg-accent/40">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-y-10 px-6 py-16 lg:grid-cols-4 lg:px-8">
+    <section id="stats" className="border-y bg-accent/40">
+      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-y-10 px-6 py-16 sm:grid-cols-3 sm:gap-x-6 lg:px-8">
         {stats.map((stat) => (
           <div key={stat.label} className="text-center">
             {/* Gradient number */}

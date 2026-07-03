@@ -325,7 +325,7 @@ export default function PitchDeck() {
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
                 <h3 className="text-lg font-bold text-slate-900 mb-4">About the Founder</h3>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0">
                     {idea.ownerProfilePicture ? (
                       <img src={idea.ownerProfilePicture} className="w-full h-full object-cover" />
                     ) : (

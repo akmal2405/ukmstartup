@@ -10,8 +10,11 @@ import {
   getRelatedIdeas,
   clearIdeaPitchField,
   searchIdeas,
+  updateIdeaAiEvaluation,
+  updateIdeaFields,
 } from "../models/ideaModel.js";
 import { searchCompanies } from "../models/userModel.js";
+import { runAiEvaluation } from "../services/aiEvaluationService.js";
 
 export const getIdeas = async (req, res) => {
   try {
@@ -27,11 +30,8 @@ export const getIdeas = async (req, res) => {
 export const createIdea = async (req, res) => {
   try {
     const logoPath = req.files?.logo ? req.files.logo[0].secure_url : null;
-
     const coverPath = req.files?.cover ? req.files.cover[0].secure_url : null;
-
-    const { startupName, category, phoneNumber, shortDescription, status } =
-      req.body;
+    const { startupName, category, phoneNumber, shortDescription, status } = req.body;
 
     const idea = await insertIdeas(
       req.user.id,
@@ -43,6 +43,20 @@ export const createIdea = async (req, res) => {
       shortDescription,
       status || "draft",
     );
+
+    try {
+      const evaluation = await runAiEvaluation({ startupName, category, shortDescription });
+      await updateIdeaAiEvaluation(idea.id, evaluation);
+      idea.aiScore = evaluation.score;
+      idea.aiSummary = evaluation.summary;
+      idea.aiStrengths = evaluation.strengths;
+      idea.aiImprovements = evaluation.improvements;
+      idea.aiVerdict = evaluation.verdict;
+      idea.aiEvaluatedAt = new Date().toISOString();
+    } catch (aiError) {
+      console.error("AI evaluation failed (idea still created):", aiError.message);
+    }
+
     res.status(201).json(idea);
   } catch (error) {
     console.error("CREATE IDEA ERROR:", error.message);
@@ -67,14 +81,58 @@ export const getIdea = async (req, res) => {
 
 export const deleteIdea = async (req, res) => {
   try {
-    const idea = await deleteIdeaById(req.params.id);
-    if (!idea) {
+    const existing = await getIdeaById(req.params.id);
+    if (!existing) {
       return res.status(404).json({ error: "idea not found" });
     }
+    if (existing.userId !== req.user.id) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    const idea = await deleteIdeaById(req.params.id);
     res.json(idea);
   } catch (error) {
     console.error("ERROR TO DELETE IDEA:", error);
     res.status(500).json({ error: "failed to delete idea" });
+  }
+};
+
+export const updateIdea = async (req, res) => {
+  try {
+    const ideaId = req.params.id;
+    const existing = await getIdeaById(ideaId);
+    if (!existing) return res.status(404).json({ error: "Idea not found" });
+    if (existing.userId !== req.user.id) return res.status(403).json({ error: "Not authorized" });
+
+    const logoPath = req.files?.logo ? req.files.logo[0].secure_url : null;
+    const coverPath = req.files?.cover ? req.files.cover[0].secure_url : null;
+    const { startupName, category, phoneNumber, shortDescription } = req.body;
+
+    const updated = await updateIdeaFields(ideaId, {
+      startupName,
+      category,
+      phoneNumber,
+      shortDescription,
+      logoUrl: logoPath,
+      coverImageUrl: coverPath,
+    });
+
+    try {
+      const evaluation = await runAiEvaluation({ startupName, category, shortDescription });
+      await updateIdeaAiEvaluation(ideaId, evaluation);
+      updated.aiScore = evaluation.score;
+      updated.aiSummary = evaluation.summary;
+      updated.aiStrengths = evaluation.strengths;
+      updated.aiImprovements = evaluation.improvements;
+      updated.aiVerdict = evaluation.verdict;
+      updated.aiEvaluatedAt = new Date().toISOString();
+    } catch (aiError) {
+      console.error("AI re-evaluation failed (update still saved):", aiError.message);
+    }
+
+    res.json(updated);
+  } catch (error) {
+    console.error("UPDATE IDEA ERROR:", error.message);
+    res.status(500).json({ error: "Failed to update idea" });
   }
 };
 

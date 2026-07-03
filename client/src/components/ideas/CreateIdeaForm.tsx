@@ -1,4 +1,4 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import AiResultCard from "./aiResultCard";
 import { ImagePlus, Upload } from "lucide-react";
@@ -19,8 +19,20 @@ import IdeaPreviewCard from "./ideaPreviewCard";
 import { CATEGORIES, CATEGORY_LABELS } from "../../constants/categories";
 const ALL_CATEGORIES = [...CATEGORIES, "Social"];
 
+interface InitialData {
+  startupName: string;
+  category: string;
+  phoneNumber?: string;
+  shortDescription: string;
+  logoUrl?: string;
+  coverUrl?: string;
+  hasEngagement?: boolean;
+}
+
 interface CreateIdeaFormProps {
   onSuccess?: () => void;
+  ideaId?: string;
+  initialData?: InitialData;
 }
 
 interface AiResult {
@@ -31,9 +43,8 @@ interface AiResult {
   verdict: string;
 }
 
-export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
+export default function CreateIdeaForm({ onSuccess, ideaId, initialData }: CreateIdeaFormProps) {
   const [aiResult, setAiResult] = useState<AiResult | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -49,6 +60,20 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [ideaSubmitted, setIdeaSubmitted] = useState(false);
+
+  // Pre-fill form when in edit mode
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        startupName: initialData.startupName || "",
+        category: initialData.category || "",
+        phoneNumber: initialData.phoneNumber || "",
+        shortDescription: initialData.shortDescription || "",
+      });
+      if (initialData.logoUrl) setLogoPreview(initialData.logoUrl);
+      if (initialData.coverUrl) setCoverPreview(initialData.coverUrl);
+    }
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -66,6 +91,14 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (ideaId && initialData?.hasEngagement) {
+      const confirmed = confirm(
+        "This idea already has community engagement (votes, comments, or interest). Editing will re-run the AI evaluation. Existing votes and comments will remain attached. Continue?"
+      );
+      if (!confirmed) return;
+    }
+
     setIsLoading(true);
 
     const data = new FormData();
@@ -73,50 +106,44 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
     data.append("category", formData.category);
     data.append("phoneNumber", formData.phoneNumber);
     data.append("shortDescription", formData.shortDescription);
-    data.append("status", "draft");
+    if (!ideaId) data.append("status", "draft");
     if (logoFile) data.append("logo", logoFile);
     if (coverFile) data.append("cover", coverFile);
 
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ideas`, {
-        method: "POST",
+      const url = ideaId
+        ? `${import.meta.env.VITE_API_URL}/api/ideas/${ideaId}`
+        : `${import.meta.env.VITE_API_URL}/api/ideas`;
+      const method = ideaId ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: { Authorization: `Bearer ${token}` },
         body: data,
       });
 
-      if (!response.ok) throw new Error("Failed to submit idea");
+      if (!response.ok) throw new Error(ideaId ? "Failed to update idea" : "Failed to submit idea");
 
-      setIdeaSubmitted(true);
-      setIsLoading(false);
+      const ideaData = await response.json();
 
-      // 2. Call AI evaluator
-      setAiLoading(true);
-      const aiRes = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/evaluate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          startupName: formData.startupName,
-          category: formData.category,
-          shortDescription: formData.shortDescription,
-        }),
-      });
-
-      if (aiRes.ok) {
-        const aiData = await aiRes.json();
-        setAiResult(aiData);
+      if (ideaData.aiScore !== undefined && ideaData.aiScore !== null) {
+        setAiResult({
+          score: ideaData.aiScore,
+          summary: ideaData.aiSummary,
+          strengths: ideaData.aiStrengths || [],
+          improvements: ideaData.aiImprovements || [],
+          verdict: ideaData.aiVerdict,
+        });
       }
 
+      setIdeaSubmitted(true);
     } catch (error) {
       console.error(error);
-      alert("Failed to submit idea. Please try again.");
+      alert(ideaId ? "Failed to update idea. Please try again." : "Failed to submit idea. Please try again.");
     } finally {
       setIsLoading(false);
-      setAiLoading(false);
     }
   };
 
@@ -128,19 +155,20 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
     setCoverFile(null);
     setLogoPreview(null);
     setCoverPreview(null);
+    if (ideaId) {
+      navigate(`/idea/${ideaId}`);
+    }
   };
-
 
   if (ideaSubmitted) {
     return (
       <AiResultCard
         aiResult={aiResult}
-        aiLoading={aiLoading}
+        aiLoading={false}
         onReset={handleReset}
         logoPreview={logoPreview}
         coverPreview={coverPreview}
         formData={formData}
-
       />
     );
   }
@@ -150,10 +178,12 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-            Submit New Idea
+            {ideaId ? "Edit Idea" : "Submit New Idea"}
           </h1>
           <p className="text-slate-500 mt-1">
-            Share your startup idea with the UKMStartUp community.
+            {ideaId
+              ? "Update your startup idea details. The AI evaluation will re-run on save."
+              : "Share your startup idea with the UKMStartUp community."}
           </p>
         </div>
       </div>
@@ -293,6 +323,7 @@ export default function CreateIdeaForm({ onSuccess }: CreateIdeaFormProps) {
           coverPreview={coverPreview}
           isLoading={isLoading}
           showSubmitBar={true}
+          submitLabel={ideaId ? "Save Changes" : undefined}
         />
       </form>
     </div>

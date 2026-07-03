@@ -23,14 +23,18 @@ export const createVote = async (req, res) => {
     const existing = await getExistingVote(idea_id, user_id);
 
     let notifyVoteType = null;
+    let newUserVote = null; // what the user's vote state is AFTER this action
     if (existing.length === 0) {
       await insertVote(idea_id, user_id, voteType);
       notifyVoteType = voteType;
+      newUserVote = voteType;
     } else if (existing[0].voteType === voteType) {
       await deleteVote(idea_id, user_id);
+      newUserVote = null; // toggled off
     } else {
       await updateVote(voteType, idea_id, user_id);
       notifyVoteType = voteType;
+      newUserVote = voteType; // switched
     }
 
     await recalculateVoteCounts(idea_id);
@@ -41,6 +45,7 @@ export const createVote = async (req, res) => {
       upvoteCount,
       downvoteCount,
       netScore: upvoteCount - downvoteCount,
+      userVote: newUserVote,
     });
 
     if (notifyVoteType) {

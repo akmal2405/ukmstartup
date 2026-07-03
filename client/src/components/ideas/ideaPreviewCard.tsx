@@ -13,12 +13,13 @@ interface IdeaPreviewCardProps {
   coverPreview: string | null;
   isLoading: boolean;
   showSubmitBar?: boolean;
+  submitLabel?: string;
 }
 
 
 
 
-export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, isLoading, showSubmitBar }: IdeaPreviewCardProps) {
+export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, isLoading, showSubmitBar, submitLabel }: IdeaPreviewCardProps) {
   const navigate = useNavigate();
   const initials = formData.startupName
     ? formData.startupName.slice(0, 2).toUpperCase()
@@ -82,7 +83,7 @@ export default function IdeaPreviewCard({ formData, logoPreview, coverPreview, i
                     disabled={isLoading}
                     className="bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] text-white rounded-full px-6"
                   >
-                    {isLoading ? "Submitting..." : "Submit Idea"}
+                    {isLoading ? "Submitting..." : (submitLabel ?? "Submit Idea")}
                   </Button>
                 </div>
               </div>

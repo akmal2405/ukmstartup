@@ -78,6 +78,15 @@ export const getIdeaById = async (id) => {
       ideas.youtube_url AS "youtubeUrl",
       ideas.slides_url AS "slidesUrl",
       ideas.gallery_image_urls AS "galleryImageUrls",
+      ideas.upvote_count AS "upvoteCount",
+      ideas.downvote_count AS "downvoteCount",
+      ideas.interest_count AS "interestCount",
+      ideas.ai_score AS "aiScore",
+      ideas.ai_summary AS "aiSummary",
+      ideas.ai_strengths AS "aiStrengths",
+      ideas.ai_improvements AS "aiImprovements",
+      ideas.ai_verdict AS "aiVerdict",
+      ideas.ai_evaluated_at AS "aiEvaluatedAt",
       users.full_name AS "ownerName",
       users.profile_pictures_url AS "ownerProfilePicture",
       users.community_role AS "ownerCommunityRole",
@@ -142,6 +151,51 @@ export const insertIdeas = async (
   } catch (error) {
     throw error;
   }
+};
+
+export const updateIdeaAiEvaluation = async (ideaId, { score, summary, strengths, improvements, verdict }) => {
+  await pool.query(
+    `UPDATE ideas
+     SET ai_score = $2,
+         ai_summary = $3,
+         ai_strengths = $4,
+         ai_improvements = $5,
+         ai_verdict = $6,
+         ai_evaluated_at = now()
+     WHERE id = $1`,
+    [ideaId, score, summary, strengths, improvements, verdict],
+  );
+};
+
+export const updateIdeaFields = async (ideaId, { startupName, category, phoneNumber, shortDescription, logoUrl, coverImageUrl }) => {
+  const result = await pool.query(
+    `UPDATE ideas
+     SET startup_name = $2,
+         category = $3,
+         phone_number = $4,
+         short_description = $5,
+         logo_url = COALESCE($6, logo_url),
+         cover_image_url = COALESCE($7, cover_image_url)
+     WHERE id = $1
+     RETURNING
+       id,
+       user_id AS "userId",
+       startup_name AS "startupName",
+       category,
+       phone_number AS "phoneNumber",
+       logo_url AS "logoUrl",
+       cover_image_url AS "coverImageUrl",
+       short_description AS "shortDescription",
+       status,
+       youtube_url AS "youtubeUrl",
+       slides_url AS "slidesUrl",
+       upvote_count AS "upvoteCount",
+       downvote_count AS "downvoteCount",
+       interest_count AS "interestCount",
+       created_at AS "createdAt"`,
+    [ideaId, startupName, category, phoneNumber || null, shortDescription, logoUrl || null, coverImageUrl || null],
+  );
+  return result.rows[0];
 };
 
 export const deleteIdea = async (ideaId) => {

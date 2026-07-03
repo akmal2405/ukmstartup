@@ -10,6 +10,7 @@ interface VotePillProps {
 export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
   const [netScore, setNetScore] = useState(0);
   const [userVote, setUserVote] = useState<VoteType | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
 
   useEffect(() => {
     const fetchVotes = async () => {
@@ -28,6 +29,11 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
   }, [ideaId]);
 
   const handleVote = async (voteType: VoteType) => {
+    if (isVoting) return; // ignore clicks while a request is in flight
+
+    const prevNetScore = netScore;
+    const prevUserVote = userVote;
+
     const removing = userVote === voteType;
     const switching = !removing && userVote !== null;
     const delta = removing
@@ -36,7 +42,8 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
         ? (voteType === "up" ? 2 : -2)
         : (voteType === "up" ? 1 : -1);
 
-    setNetScore((prev) => prev + delta);
+    setIsVoting(true);
+    setNetScore(prevNetScore + delta);
     setUserVote(removing ? null : voteType);
 
     try {
@@ -52,13 +59,16 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
       if (res.ok) {
         const data: VoteResponse = await res.json();
         setNetScore(data.netScore);
+        setUserVote(data.userVote);
       } else {
-        setNetScore((prev) => prev - delta);
-        setUserVote(userVote);
+        setNetScore(prevNetScore);
+        setUserVote(prevUserVote);
       }
     } catch {
-      setNetScore((prev) => prev - delta);
-      setUserVote(userVote);
+      setNetScore(prevNetScore);
+      setUserVote(prevUserVote);
+    } finally {
+      setIsVoting(false);
     }
   };
 
@@ -69,9 +79,9 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
         <div
           onClick={(e) => {
             e.stopPropagation();
-            handleVote("up");
+            if (!isVoting) handleVote("up");
           }}
-          className="p-1 rounded-full hover:bg-gray-300 cursor-pointer">
+          className={`p-1 rounded-full hover:bg-gray-300 ${isVoting ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
           <ArrowBigUp className={`w-4 h-4 ${userVote === "up" ? "text-orange-500" : "text-gray-600"}`} />
         </div>
 
@@ -81,9 +91,9 @@ export default function VotePill({ ideaId, commentCount = 0 }: VotePillProps) {
 
         <div onClick={(e) => {
           e.stopPropagation();
-          handleVote("down");
+          if (!isVoting) handleVote("down");
         }}
-          className="p-1 rounded-full hover:bg-gray-300 cursor-pointer" >
+          className={`p-1 rounded-full hover:bg-gray-300 ${isVoting ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`} >
           <ArrowBigDown className={`w-4 h-4 ${userVote === "down" ? "text-blue-500" : "text-gray-600"}`} />
         </div>
       </div>

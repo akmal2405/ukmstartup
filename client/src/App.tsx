@@ -24,6 +24,7 @@ import ResetPassword from "./pages/ResetPassword";
 import SearchResults from "./pages/SearchResults";
 import CompanyProfile from "./pages/CompanyProfile";
 import IndustryInterests from "./pages/IndustryInterests";
+import EditIdea from "./pages/EditIdea";
 
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -84,6 +85,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/create-idea" element={<CreateIdea />} />
           <Route path="/idea/:id" element={<PitchDeck />} />
+          <Route path="/idea/:id/edit" element={<EditIdea />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/my-ideas" element={<MyIdeas />} />
           <Route path="/category/:categorySlug" element={<CategoryPage />} />

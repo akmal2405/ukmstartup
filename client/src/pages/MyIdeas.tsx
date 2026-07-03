@@ -110,6 +110,12 @@ export default function MyIdeas() {
                           View
                         </button>
                         <button
+                          onClick={() => navigate(`/idea/${idea.id}/edit`)}
+                          className="text-sm font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 transition"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => handleDelete(idea.id)}
                           className="text-sm font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition"
                         >
