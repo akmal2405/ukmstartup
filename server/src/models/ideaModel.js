@@ -86,6 +86,7 @@ export const getIdeaById = async (id) => {
       ideas.ai_strengths AS "aiStrengths",
       ideas.ai_improvements AS "aiImprovements",
       ideas.ai_verdict AS "aiVerdict",
+      ideas.ai_scores AS "aiScores",
       ideas.ai_evaluated_at AS "aiEvaluatedAt",
       users.full_name AS "ownerName",
       users.profile_pictures_url AS "ownerProfilePicture",
@@ -153,7 +154,7 @@ export const insertIdeas = async (
   }
 };
 
-export const updateIdeaAiEvaluation = async (ideaId, { score, summary, strengths, improvements, verdict }) => {
+export const updateIdeaAiEvaluation = async (ideaId, { score, summary, strengths, improvements, verdict, scores }) => {
   await pool.query(
     `UPDATE ideas
      SET ai_score = $2,
@@ -161,9 +162,10 @@ export const updateIdeaAiEvaluation = async (ideaId, { score, summary, strengths
          ai_strengths = $4,
          ai_improvements = $5,
          ai_verdict = $6,
+         ai_scores = $7,
          ai_evaluated_at = now()
      WHERE id = $1`,
-    [ideaId, score, summary, strengths, improvements, verdict],
+    [ideaId, score, summary, strengths, improvements, verdict, scores],
   );
 };
 

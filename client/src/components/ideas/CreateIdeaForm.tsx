@@ -41,6 +41,12 @@ interface AiResult {
   strengths: string[];
   improvements: string[];
   verdict: string;
+  scores?: {
+    keaslian: number;
+    kebolehlaksanaan: number;
+    saizPasaran: number;
+    kejelasanMasalah: number;
+  };
 }
 
 export default function CreateIdeaForm({ onSuccess, ideaId, initialData }: CreateIdeaFormProps) {
@@ -135,6 +141,7 @@ export default function CreateIdeaForm({ onSuccess, ideaId, initialData }: Creat
           strengths: ideaData.aiStrengths || [],
           improvements: ideaData.aiImprovements || [],
           verdict: ideaData.aiVerdict,
+          scores: ideaData.aiScores,
         });
       }
 

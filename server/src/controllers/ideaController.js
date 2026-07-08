@@ -52,6 +52,7 @@ export const createIdea = async (req, res) => {
       idea.aiStrengths = evaluation.strengths;
       idea.aiImprovements = evaluation.improvements;
       idea.aiVerdict = evaluation.verdict;
+      idea.aiScores = evaluation.scores;
       idea.aiEvaluatedAt = new Date().toISOString();
     } catch (aiError) {
       console.error("AI evaluation failed (idea still created):", aiError.message);
@@ -124,6 +125,7 @@ export const updateIdea = async (req, res) => {
       updated.aiStrengths = evaluation.strengths;
       updated.aiImprovements = evaluation.improvements;
       updated.aiVerdict = evaluation.verdict;
+      updated.aiScores = evaluation.scores;
       updated.aiEvaluatedAt = new Date().toISOString();
     } catch (aiError) {
       console.error("AI re-evaluation failed (update still saved):", aiError.message);

@@ -8,6 +8,12 @@ interface AiResult {
   strengths: string[];
   improvements: string[];
   verdict: string;
+  scores?: {
+    keaslian: number;
+    kebolehlaksanaan: number;
+    saizPasaran: number;
+    kejelasanMasalah: number;
+  };
 }
 
 interface AiResultCardProps {
@@ -65,6 +71,33 @@ export default function AiResultCard({ aiResult, aiLoading, onReset, formData, l
             <div className="p-6 space-y-5">
               {/* Summary */}
               <p className="text-sm text-slate-600 leading-relaxed">{aiResult.summary}</p>
+
+              {/* Score Breakdown */}
+              {aiResult.scores && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+                    Score Breakdown
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center">
+                      <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Keaslian</p>
+                      <p className="text-lg font-bold text-slate-900">{aiResult.scores.keaslian}/10</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center">
+                      <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Kebolehlaksanaan</p>
+                      <p className="text-lg font-bold text-slate-900">{aiResult.scores.kebolehlaksanaan}/10</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center">
+                      <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Saiz Pasaran</p>
+                      <p className="text-lg font-bold text-slate-900">{aiResult.scores.saizPasaran}/10</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center">
+                      <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Kejelasan Masalah</p>
+                      <p className="text-lg font-bold text-slate-900">{aiResult.scores.kejelasanMasalah}/10</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Strengths */}
               <div>
