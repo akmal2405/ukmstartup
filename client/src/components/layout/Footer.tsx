@@ -7,15 +7,15 @@ const columns: Column[] = [
   {
     heading: "Explore",
     links: [
-      { label: "All Ideas", to: "/ideas" },
-      { label: "Top Voted Ideas", to: "/" },
-      { label: "Search Ideas", to: "/search" },
+      { label: "All Ideas", to: "/dashboard" },
+      { label: "Top Voted Ideas", to: "/dashboard" },
+      { label: "Search Ideas", to: "/dashboard" },
     ],
   },
   {
     heading: "Community",
     links: [
-      { label: "Submit New Idea", to: "/ideas/new" },
+      { label: "Submit New Idea", to: "/create-idea" },
       { label: "My Profile", to: "/profile" },
       { label: "My Industry Interests", to: "/profile" },
     ],
@@ -23,16 +23,15 @@ const columns: Column[] = [
   {
     heading: "Industry",
     links: [
-      { label: "Explore Student Ideas", to: "/ideas" },
+      { label: "Explore Student Ideas", to: "/dashboard" },
       { label: "Interests Sent", to: "/profile" },
-      { label: "Register as Industry", to: "/register" },
     ],
   },
   {
     heading: "About",
     links: [
-      { label: "About UKMStartUp", to: "/about" },
-      { label: "FAQ", to: "/faq" },
+      { label: "About UKMStartUp", to: "" },
+      { label: "FAQ", to: "" },
     ],
   },
 ];
@@ -81,7 +80,7 @@ export default function Footer() {
             Universiti Kebangsaan Malaysia
           </p>
           <p className="text-sm text-slate-500">
-            Built with ❤️ by{" "}
+            Built by{" "}
             <span className="text-slate-300">Muhammad Akmal bin Bahari</span>
           </p>
         </div>
