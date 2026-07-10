@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import AiResultCard from "./aiResultCard";
 import { ImagePlus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -148,7 +149,7 @@ export default function CreateIdeaForm({ onSuccess, ideaId, initialData }: Creat
       setIdeaSubmitted(true);
     } catch (error) {
       console.error(error);
-      alert(ideaId ? "Failed to update idea. Please try again." : "Failed to submit idea. Please try again.");
+      toast.error(ideaId ? "Failed to update idea. Please try again." : "Failed to submit idea. Please try again.");
     } finally {
       setIsLoading(false);
     }

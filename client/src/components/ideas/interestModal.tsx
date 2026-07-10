@@ -5,6 +5,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StringToBoolean } from "class-variance-authority/types";
+import { toast } from "sonner";
 
 
 
@@ -35,7 +36,7 @@ export default function InterestModal({ isOpen, onClose, ideaId, startupName }: 
 
       if (response.status === 400) {
         const data = await response.json();
-        alert(data.message || "You have already expressed interest in this idea.");
+        toast.info(data.message || "You have already expressed interest in this idea.");
         onClose();
         return;
       }
@@ -43,12 +44,12 @@ export default function InterestModal({ isOpen, onClose, ideaId, startupName }: 
       if (!response.ok) throw new Error("Failed to submit interest");
 
 
-      alert("Interest submitted successfully!");
+      toast.success("Interest submitted successfully!");
       setMessage("");
       onClose();
     } catch (error) {
       console.error(error);
-      alert("Error submitting interest. Please try again.");
+      toast.error("Error submitting interest. Please try again.");
     }
 
   };

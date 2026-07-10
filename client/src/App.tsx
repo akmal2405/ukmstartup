@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
 import UKMStartUPLogin from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CreateIdea from "./pages/CreateIdea";
@@ -114,6 +115,7 @@ function App() {
 
       </Routes>
       <Footer />
+      <Toaster />
     </BrowserRouter>
   );
 }
