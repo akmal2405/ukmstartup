@@ -68,7 +68,6 @@ export default function CreateIdeaForm({ onSuccess, ideaId, initialData }: Creat
   const [isLoading, setIsLoading] = useState(false);
   const [ideaSubmitted, setIdeaSubmitted] = useState(false);
 
-  // Pre-fill form when in edit mode
   useEffect(() => {
     if (initialData) {
       setFormData({

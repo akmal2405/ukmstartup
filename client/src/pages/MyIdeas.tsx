@@ -6,6 +6,10 @@ import { Plus, Lightbulb } from "lucide-react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const STATUS_CLASS: Record<string, string> = {
   published: "bg-emerald-100 text-emerald-700",
@@ -18,6 +22,7 @@ export default function MyIdeas() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const [deleteTarget, setDeleteTarget] = useState<Idea | null>(null);
 
   useEffect(() => {
     const fetchIdeas = async () => {
@@ -37,17 +42,19 @@ export default function MyIdeas() {
     fetchIdeas();
   }, []);
 
-  const handleDelete = async (ideaId: string) => {
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     const token = localStorage.getItem("token");
-    await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${ideaId}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/ideas/${deleteTarget.id}`, {
       headers: { Authorization: `Bearer ${token}` },
       method: "DELETE",
     });
-    setIdeas((prev) => prev.filter((idea) => idea.id !== ideaId));
+    setIdeas((prev) => prev.filter((idea) => idea.id !== deleteTarget.id));
+    setDeleteTarget(null);
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">My Ideas</h1>
@@ -116,7 +123,7 @@ export default function MyIdeas() {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(idea.id)}
+                          onClick={() => setDeleteTarget(idea)}
                           className="text-sm font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition"
                         >
                           Delete
@@ -124,9 +131,26 @@ export default function MyIdeas() {
                       </div>
                     </TableCell>
                   </TableRow>
+
                 ))}
               </TableBody>
             </Table>
+            <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+              <AlertDialogContent className="max-w-sm bg-white">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this idea?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete "{deleteTarget?.startupName}". This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>
