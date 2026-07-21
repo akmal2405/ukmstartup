@@ -7,6 +7,7 @@ export const getAllUsers = async () => {
       email,
       user_type AS "userType",
       full_name AS "fullName",
+      contact_person AS "contactPerson",
       community_role AS "communityRole",
       company_name AS "companyName",
       industry,

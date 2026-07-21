@@ -63,7 +63,7 @@ export default function AdminUsers() {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.fullName}</TableCell>
+                <TableCell className="font-medium">{user.fullName || user.contactPerson}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell className="capitalize">{user.userType}</TableCell>
                 <TableCell className="text-right">
