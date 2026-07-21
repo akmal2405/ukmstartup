@@ -14,6 +14,7 @@ import {
   updateIdeaFields,
 } from "../models/ideaModel.js";
 import { searchCompanies } from "../models/userModel.js";
+import { getTopCategory as fetchTopCategory } from "../admin/adminModel.js";
 import { runAiEvaluation } from "../services/aiEvaluationService.js";
 
 export const getIdeas = async (req, res) => {
@@ -181,6 +182,17 @@ export const getTopVotedIdeas = async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error("Error fetching top voted ideas:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getTopCategory = async (req, res) => {
+  try {
+    const { period } = req.query;
+    const data = await fetchTopCategory(period);
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching top category:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

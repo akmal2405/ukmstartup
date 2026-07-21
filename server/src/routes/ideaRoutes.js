@@ -11,6 +11,7 @@ import {
   updateIdea,
   updatePitchDeck,
   getTopVotedIdeas,
+  getTopCategory,
   fetchRelatedIdeas,
   clearPitchField,
   search,
@@ -54,6 +55,7 @@ const uploadPitch = multer({ storage: pitchStorage });
 
 router.get("/my-ideas", protect, getMyIdeas);
 router.get("/top-voted", getTopVotedIdeas);
+router.get("/top-category", getTopCategory);
 router.get("/search", search);
 router.get("/:id/related", fetchRelatedIdeas);
 router.get("/:id", getIdea);

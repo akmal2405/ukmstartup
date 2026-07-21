@@ -6,6 +6,14 @@ import IdeaCard from "../components/ideas/IdeaCard";
 import { useAuth } from "../context/AuthContext";
 import { useIdeas } from "../hooks/useIdeas";
 import { TopIdea } from "@/types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function Dashboard() {
   const [query, setQuery] = useState("");
@@ -30,6 +38,40 @@ export default function Dashboard() {
     };
     fetchTopIdeas();
   }, []);
+
+  const [topCategories, setTopCategories] = useState<
+    { category: string; ideaCount: number; totalVotes: number }[]
+  >([]);
+  const [categoryPeriod, setCategoryPeriod] = useState<"week" | "month">("week");
+  const [categoryLoading, setCategoryLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopCategories = async () => {
+      setCategoryLoading(true);
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/ideas/top-category?period=${categoryPeriod}`,
+        );
+        const data: { category: string; ideaCount: number; totalVotes: number }[] =
+          await res.json();
+        setTopCategories(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setCategoryLoading(false);
+      }
+    };
+    fetchTopCategories();
+  }, [categoryPeriod]);
+
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 9;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedIdeas = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, filtered.length]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -57,10 +99,49 @@ export default function Dashboard() {
               />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filtered.map((idea) => (
+                {paginatedIdeas.map((idea) => (
                   <IdeaCard key={idea.id} idea={idea} user={user} />
                 ))}
               </div>
+            )}
+
+            {totalPages > 1 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (page > 1) setPage(page - 1);
+                      }}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <PaginationItem key={p}>
+                      <PaginationLink
+                        href="#"
+                        isActive={p === page}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPage(p);
+                        }}
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (page < totalPages) setPage(page + 1);
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </div>
 
@@ -101,6 +182,56 @@ export default function Dashboard() {
                           <p className="text-xs text-gray-400">▲ {idea.upvoteCount} votes</p>
                         </div>
                       </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-semibold text-gray-700">Top Category</p>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCategoryPeriod("week")}
+                      className={`text-xs px-2 py-1 rounded-lg transition ${
+                        categoryPeriod === "week"
+                          ? "bg-indigo-600 text-white"
+                          : "text-gray-400 hover:bg-slate-50"
+                      }`}
+                    >
+                      Week
+                    </button>
+                    <button
+                      onClick={() => setCategoryPeriod("month")}
+                      className={`text-xs px-2 py-1 rounded-lg transition ${
+                        categoryPeriod === "month"
+                          ? "bg-indigo-600 text-white"
+                          : "text-gray-400 hover:bg-slate-50"
+                      }`}
+                    >
+                      Month
+                    </button>
+                  </div>
+                </div>
+                {categoryLoading ? (
+                  <p className="text-xs text-gray-400">Loading...</p>
+                ) : topCategories.length === 0 ? (
+                  <p className="text-xs text-gray-400">No data yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {topCategories.map((cat, index) => (
+                      <div
+                        key={cat.category}
+                        className="flex items-center gap-3 -mx-2 px-2 py-1 rounded-lg"
+                      >
+                        <span className="text-xs font-bold text-gray-400 w-4">{index + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-gray-800 truncate">{cat.category}</p>
+                          <p className="text-xs text-gray-400">
+                            {cat.ideaCount} ideas · ▲ {cat.totalVotes} votes
+                          </p>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}

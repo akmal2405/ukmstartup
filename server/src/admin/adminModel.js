@@ -106,3 +106,19 @@ export const deleteIdea = async (ideaId) => {
     throw error;
   }
 };
+
+export const getTopCategory = async (period = "week") => {
+  const interval = period === "month" ? "1 month" : "7 days";
+  const result = await pool.query(`
+    SELECT
+      category,
+      COUNT(*)::int AS "ideaCount",
+      COALESCE(SUM(upvote_count), 0)::int AS "totalVotes"
+    FROM ideas
+    WHERE created_at >= NOW() - INTERVAL '${interval}'
+    GROUP BY category
+    ORDER BY "totalVotes" DESC, "ideaCount" DESC
+    LIMIT 5
+  `);
+  return result.rows;
+};
