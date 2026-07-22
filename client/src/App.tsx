@@ -25,6 +25,7 @@ import ResetPassword from "./pages/ResetPassword";
 import SearchResults from "./pages/SearchResults";
 import CompanyProfile from "./pages/CompanyProfile";
 import IndustryInterests from "./pages/IndustryInterests";
+import IndustryInterestsReceived from "./pages/IndustryInterestsReceived";
 import EditIdea from "./pages/EditIdea";
 
 
@@ -94,6 +95,7 @@ function App() {
           <Route path="/companies/:id" element={<CompanyProfile />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/my-interests" element={<IndustryInterests />} />
+          <Route path="/my-industry-interests" element={<IndustryInterestsReceived />} />
           {/* <Route path="/dashboard/idea/:id" element={<PitchDeck />} /> */}
         </Route>
 

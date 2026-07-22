@@ -17,7 +17,7 @@ const columns: Column[] = [
     links: [
       { label: "Submit New Idea", to: "/create-idea" },
       { label: "My Profile", to: "/profile" },
-      { label: "My Industry Interests", to: "/profile" },
+      { label: "My Industry Interests", to: "/my-industry-interests" },
     ],
   },
   {

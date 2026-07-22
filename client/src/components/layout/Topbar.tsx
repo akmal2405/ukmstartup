@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, User, LogOutIcon, LightbulbIcon, CogIcon, Building, ChevronDown, Menu, Star } from "lucide-react";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { useSidebar } from "@/context/SidebarContext";
@@ -21,6 +21,11 @@ export default function Topbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { toggle } = useSidebar();
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
+
+  useEffect(() => {
+    setAvatarLoaded(false);
+  }, [user?.profilePicture]);
 
   const initials = user?.fullName
     ?.split(" ")
@@ -115,9 +120,21 @@ export default function Topbar() {
       {/* Avatar dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 transition">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] text-white grid place-items-center text-xs font-bold overflow-hidden flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#9B59D0] via-[#D4609A] to-[#E8745A] text-white grid place-items-center text-xs font-bold overflow-hidden flex-shrink-0 relative">
             {user?.profilePicture ? (
-              <img src={user.profilePicture} className="w-full h-full object-cover" />
+              <>
+                {!avatarLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-3 h-3 border-2 border-white/60 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+                <img
+                  src={user.profilePicture}
+                  onLoad={() => setAvatarLoaded(true)}
+                  onError={() => setAvatarLoaded(true)}
+                  className={`w-full h-full object-cover transition-opacity ${avatarLoaded ? "opacity-100" : "opacity-0"}`}
+                />
+              </>
             ) : (
               initials)}
           </div>
@@ -134,12 +151,20 @@ export default function Topbar() {
             </a>
           </DropdownMenuItem>
           {user?.userType === "community" && (
-            <DropdownMenuItem>
-              <a href="/my-ideas" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
-                <LightbulbIcon className="w-5 h-5 text-slate-400" />
-                My ideas
-              </a>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem>
+                <a href="/my-ideas" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
+                  <LightbulbIcon className="w-5 h-5 text-slate-400" />
+                  My ideas
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <a href="/my-industry-interests" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-100 transition">
+                  <Star className="w-5 h-5 text-slate-400" />
+                  Industry Interest
+                </a>
+              </DropdownMenuItem>
+            </>
           )}
           {user?.userType === "company" && (
             <DropdownMenuItem>

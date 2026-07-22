@@ -73,7 +73,10 @@ export default function Sidebar() {
         )}
 
         {user?.userType === "community" && (
-          <SidebarLink to="/my-ideas" icon={Lightbulb} label="My Ideas" isOpen={isOpen} />
+          <>
+            <SidebarLink to="/my-ideas" icon={Lightbulb} label="My Ideas" isOpen={isOpen} />
+            <SidebarLink to="/my-industry-interests" icon={Star} label="Industry Interest" isOpen={isOpen} />
+          </>
         )}
         {user?.userType === "company" && (
           <SidebarLink to="/my-interests" icon={Star} label="My Interests" isOpen={isOpen} />
