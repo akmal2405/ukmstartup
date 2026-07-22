@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, ThumbsUp, ThumbsDown, MessageCircle, Building2 } from "lucide-react";
+import { Bell, ThumbsUp, ThumbsDown, MessageCircle, Building2, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
 
 interface Notification {
   id: string;
-  type: "upvote" | "downvote" | "comment" | "interest";
+  type: "upvote" | "downvote" | "comment" | "interest" | "status_update";
   message: string;
   ideaId: string;
   isRead: boolean;
@@ -37,6 +37,8 @@ function NotifIcon({ type }: { type: Notification["type"] }) {
       return <MessageCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />;
     case "interest":
       return <Building2 className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />;
+    case "status_update":
+      return <RefreshCw className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />;
   }
 }
 

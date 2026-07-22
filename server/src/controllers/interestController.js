@@ -115,6 +115,24 @@ export const changeInterestStatus = async (req, res) => {
 
     const updated = await updateInterestStatus(interestId, status);
     res.json(updated);
+
+    if (status === "contacted") {
+      insertNotification(
+        interest.companyId,
+        userId,
+        "status_update",
+        interest.ideaId,
+        `Your interest has been accepted! The idea owner wants to connect.`,
+      );
+    } else if (status === "declined") {
+      insertNotification(
+        interest.companyId,
+        userId,
+        "status_update",
+        interest.ideaId,
+        `Your interest was declined.`,
+      );
+    }
   } catch (error) {
     console.error("changeInterestStatus error:", error.message);
     res
